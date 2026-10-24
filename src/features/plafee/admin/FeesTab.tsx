@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Coins, Pencil, Plus, Save, SlidersHorizontal, Store } from 'lucide-react';
-import { getPriceConfig, getShopItems, SHOP_CATEGORIES, TX_LABELS, type FeesTxType, type PriceConfig, type ShopCategory, type ShopItem } from '../api';
+import { getPriceConfig, getShopItems, RARITIES, RARITY_LABELS, SHOP_CATEGORIES, TX_LABELS, type FeesTxType, type PriceConfig, type ShopCategory, type ShopItem } from '../api';
 import { FeesAmount } from '../components/bits';
 import { formatFees } from '../format';
 import { getTransactions, grantFees, setFeesConfig, upsertShopItem, type AdminTransaction } from './adminApi';
@@ -12,8 +12,21 @@ const PAYLOAD_HINTS: Record<ShopCategory, { key: string; hint: string; options?:
   card_theme: { key: 'skin', hint: 'Style des cartes.', options: ['classic', 'pixel', 'holo', 'neon', 'gold'] },
   site_theme: { key: 'skin', hint: 'Couleurs du site.', options: ['arcade', 'retro', 'synthwave', 'cyber'] },
   badge: { key: 'badge_sku', hint: 'Code du badge offert (colonne « sku » d’un badge).' },
-  profile_border: { key: 'border', hint: 'Style du contour.', options: ['silver', 'gold', 'platine', 'rainbow', 'flame'] },
-  avatar_accessory: { key: 'accessory', hint: 'Posé sur la photo.', options: ['bow', 'flowers'] },
+  profile_border: {
+    key: 'border',
+    hint: 'Autour de la photo. Un nouveau nom + une image = un cadre à toi.',
+    options: ['neon', 'silver', 'frost', 'felt', 'cards', 'gold', 'rainbow', 'flowers', 'circuit', 'lava', 'flame', 'bolt', 'platine', 'glitch', 'holo', 'pixelrainbow'],
+  },
+  avatar_accessory: {
+    key: 'accessory',
+    hint: 'Posé sur un bord de la photo.',
+    options: ['cat', 'gg', 'gamepad', 'cap', 'bow', 'headset', 'horns', 'shades', 'token', 'bottle', 'halo', 'crown', 'dragon'],
+  },
+  avatar_effect: {
+    key: 'effect',
+    hint: 'Animation par-dessus la photo.',
+    options: ['bubbles', 'snow', 'coins', 'petals', 'crt', 'smoke', 'stars', 'hologram', 'aura'],
+  },
   nameplate: { key: 'plate', hint: 'Texte de la plaque (majuscules).' },
   victory_animation: { key: 'anim', hint: 'Animation.', options: ['confetti', 'fireworks', 'pixels', 'hologram'] },
 };
@@ -134,9 +147,13 @@ interface ItemForm {
   icon_url: string | null;
   effect: string;
   active: boolean;
+  rarity: string;
 }
 
-const BLANK_ITEM: ItemForm = { id: null, sku: null, name: '', description: '', category: 'nameplate', price: 300, icon_url: null, effect: '', active: true };
+const BLANK_ITEM: ItemForm = { id: null, sku: null, name: '', description: '', category: 'nameplate', price: 300, icon_url: null, effect: '', active: true, rarity: '' };
+
+/** Les rayons de la photo : leur image remplace le dessin d'origine, et un nom libre crée un objet à toi. */
+const PHOTO_CATEGORIES: ShopCategory[] = ['profile_border', 'avatar_accessory', 'avatar_effect'];
 
 function ShopItems({ flash }: { flash: FlashFn }) {
   const [items, setItems] = useState<ShopItem[] | null>(null);
@@ -163,6 +180,7 @@ function ShopItems({ flash }: { flash: FlashFn }) {
       icon_url: i.icon_url,
       effect: String(i.payload[PAYLOAD_HINTS[i.category].key] ?? (i.payload.custom ? '(texte au choix)' : '')),
       active: i.is_active,
+      rarity: i.rarity ?? '',
     });
 
   const submit = async (e: FormEvent) => {
@@ -178,6 +196,7 @@ function ShopItems({ flash }: { flash: FlashFn }) {
         icon_url: form.icon_url,
         payload: form.effect.trim() ? { [hint.key]: form.category === 'nameplate' ? form.effect.trim().toUpperCase() : form.effect.trim() } : {},
         active: form.active,
+        rarity: form.rarity,
       });
       flash('ok', form.id ? 'Objet modifié.' : 'Objet ajouté à la boutique.');
       setForm(BLANK_ITEM);
@@ -211,7 +230,23 @@ function ShopItems({ flash }: { flash: FlashFn }) {
             </select>
           </Field>
           <Field label="Effet" hint={hint.hint}>
-            {hint.options ? (
+            {PHOTO_CATEGORIES.includes(form.category) ? (
+              <>
+                <input
+                  className="neon-input"
+                  list={`fx-${form.category}`}
+                  value={form.effect}
+                  disabled={Boolean(form.sku)}
+                  maxLength={24}
+                  onChange={(e) => set('effect', e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                />
+                <datalist id={`fx-${form.category}`}>
+                  {hint.options?.map((o) => (
+                    <option key={o} value={o} />
+                  ))}
+                </datalist>
+              </>
+            ) : hint.options ? (
               <select className="neon-input" value={form.effect} disabled={Boolean(form.sku)} onChange={(e) => set('effect', e.target.value)}>
                 <option value="">—</option>
                 {hint.options.map((o) => (
@@ -224,7 +259,24 @@ function ShopItems({ flash }: { flash: FlashFn }) {
               <input className="neon-input" value={form.effect} disabled={Boolean(form.sku)} maxLength={24} onChange={(e) => set('effect', e.target.value)} />
             )}
           </Field>
-          <Field label="Image">
+          <Field label="Rareté">
+            <select className="neon-input" value={form.rarity} onChange={(e) => set('rarity', e.target.value)}>
+              <option value="">Aucune</option>
+              {RARITIES.map((r) => (
+                <option key={r} value={r}>
+                  {RARITY_LABELS[r]}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field
+            label="Image"
+            hint={
+              PHOTO_CATEGORIES.includes(form.category)
+                ? 'PNG ou SVG transparent, carré : remplace le dessin d’origine sur toutes les photos (cadre et effet : la photo occupe le centre, 77 % de l’image).'
+                : undefined
+            }
+          >
             <ImagePicker value={form.icon_url} onChange={(url) => set('icon_url', url)} folder="shop" onError={(m) => flash('error', m)} />
           </Field>
         </div>
@@ -259,6 +311,7 @@ function ShopItems({ flash }: { flash: FlashFn }) {
                 <tr>
                   <th scope="col">Objet</th>
                   <th scope="col">Rayon</th>
+                  <th scope="col">Rareté</th>
                   <th scope="col">Prix</th>
                   <th scope="col">Statut</th>
                   <th scope="col">Action</th>
@@ -269,6 +322,7 @@ function ShopItems({ flash }: { flash: FlashFn }) {
                   <tr key={i.id} data-inactive={!i.is_active || undefined}>
                     <td>{i.name}</td>
                     <td>{SHOP_CATEGORIES.find((c) => c.id === i.category)?.label}</td>
+                    <td>{i.rarity ? <span className="plf-chip-mini" data-rarity={i.rarity}>{RARITY_LABELS[i.rarity]}</span> : '—'}</td>
                     <td>{i.is_default ? 'Gratuit' : <FeesAmount value={i.price} size="sm" />}</td>
                     <td>
                       <span className="adm-pill" data-tone={i.is_active ? 'ok' : 'danger'}>

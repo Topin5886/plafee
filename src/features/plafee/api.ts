@@ -141,17 +141,37 @@ export const setReferrer = (username: string) => rpc<void>('set_referrer', { p_u
 
 // --- Boutique -------------------------------------------------------------------------
 
-export type ShopCategory = 'card_theme' | 'site_theme' | 'badge' | 'profile_border' | 'avatar_accessory' | 'nameplate' | 'victory_animation';
+export type ShopCategory =
+  | 'card_theme'
+  | 'site_theme'
+  | 'badge'
+  | 'profile_border'
+  | 'avatar_accessory'
+  | 'avatar_effect'
+  | 'nameplate'
+  | 'victory_animation';
 
 export const SHOP_CATEGORIES: { id: ShopCategory; label: string }[] = [
   { id: 'card_theme', label: 'Cartes' },
   { id: 'site_theme', label: 'Site' },
   { id: 'badge', label: 'Badges' },
-  { id: 'profile_border', label: 'Contours' },
+  { id: 'profile_border', label: 'Cadres' },
   { id: 'avatar_accessory', label: 'Accessoires' },
+  { id: 'avatar_effect', label: 'Effets' },
   { id: 'nameplate', label: 'Plaques' },
   { id: 'victory_animation', label: 'Animations' },
 ];
+
+/** La rareté d'un objet de boutique (mêmes couleurs que les trophées). */
+export type Rarity = 'bronze' | 'argent' | 'or' | 'platine' | 'divin';
+export const RARITIES: Rarity[] = ['bronze', 'argent', 'or', 'platine', 'divin'];
+export const RARITY_LABELS: Record<Rarity, string> = {
+  bronze: 'Bronze',
+  argent: 'Argent',
+  or: 'Or',
+  platine: 'Platine',
+  divin: 'Divin',
+};
 
 export interface ShopItem {
   id: string;
@@ -166,6 +186,8 @@ export interface ShopItem {
   is_default: boolean;
   is_active: boolean;
   sort_order: number;
+  /** Absent avant la migration 0010, et pour les objets sans rareté (thèmes, plaques…). */
+  rarity?: Rarity | null;
 }
 
 export interface Purchase {
@@ -222,6 +244,12 @@ export interface Cosmetics {
   victory_anim: string | null;
   /** Posé sur la photo (« bow » : le nœud papillon). Absent avant la migration 0008. */
   accessory?: string | null;
+  /** L'animation par-dessus la photo. Absent avant la migration 0010. */
+  effect?: string | null;
+  /** Visuels envoyés depuis l'admin, qui remplacent le dessin d'origine (0010). */
+  border_img?: string | null;
+  accessory_img?: string | null;
+  effect_img?: string | null;
   badges: PlayerBadge[];
   banned: boolean;
 }

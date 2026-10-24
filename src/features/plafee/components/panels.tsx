@@ -185,7 +185,7 @@ export function BadgesPanel({ userId, self = false }: { userId: string; self?: b
                   Titre : <span className="plf-title">{c.title}</span>
                 </>
               )}
-              {c.border && <> · Contour {c.border === 'badge' ? 'de badge' : c.border}</>}
+              {c.border === 'badge' && <> · Contour de badge</>}
             </p>
           )}
           <ul className="plf-badge-list">

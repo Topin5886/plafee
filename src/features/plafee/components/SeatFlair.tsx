@@ -1,7 +1,8 @@
-import { type CSSProperties, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useCosmetics } from '../useCosmetics';
 import { useSeatCards } from '../seatCosmetics';
-import { AvatarAccessory } from './AvatarAccessory';
+import { AvatarLayers } from './AvatarAccessory';
+import { lookOf } from '../avatarLook';
 
 /*
  * Les cosmétiques en partie : tout le monde voit ceux des autres. Les jeux
@@ -9,13 +10,36 @@ import { AvatarAccessory } from './AvatarAccessory';
  * table) ; ces composants vont chercher le reste.
  */
 
-/** Habille l'avatar d'une place : contour (flammes comprises) et nœud papillon. */
+/**
+ * Habille l'avatar d'une place : cadre, accessoire et effet. Sous 40 px (la
+ * taille de l'avatar du jeu, mesurée), tout est figé, comme sur le site.
+ */
 export function SeatFlair({ userId, children, className }: { userId?: string | null; children: ReactNode; className?: string }) {
   const c = useCosmetics(userId ?? null);
+  const look = lookOf(c);
+  const ref = useRef<HTMLSpanElement>(null);
+  const [small, setSmall] = useState(true);
+  const dressed = Boolean(look.border || look.accessory || look.effect || look.borderImg || look.accessoryImg || look.effectImg);
+  useLayoutEffect(() => {
+    const el = ref.current?.firstElementChild as HTMLElement | null;
+    if (!el || !dressed) return;
+    const measure = () => setSmall(el.offsetWidth < 40);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [dressed]);
   return (
-    <span className={`cos-seat${className ? ` ${className}` : ''}`} data-border={c?.border ?? undefined} data-accessory={c?.accessory ?? undefined}>
+    <span
+      ref={ref}
+      className={`cos-seat${className ? ` ${className}` : ''}`}
+      data-border={look.border ?? undefined}
+      data-accessory={look.accessory ?? undefined}
+      data-effect={look.effect ?? undefined}
+      data-small={(dressed && small) || undefined}
+    >
       {children}
-      <AvatarAccessory id={c?.accessory} />
+      <AvatarLayers look={look} />
     </span>
   );
 }

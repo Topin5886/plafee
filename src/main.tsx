@@ -18,6 +18,7 @@ import './features/rooms/rooms.css'
 import './styles/arcade.css'
 import './styles/plafee-v2.css'
 import './styles/looks.css'
+import './styles/cosmetics-base.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
