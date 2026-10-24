@@ -296,7 +296,7 @@
    ::after = souffle (planche de 10 images) ; les deux sur le même cycle de 8 s. */
 .cos-acc[data-acc='dragon'] {
   top: -15%; left: -15%; right: auto; bottom: auto;
-  width: 80%; height: 62%;
+  width: 90%; height: 62%;
   overflow: hidden;
   background-image: url('/cosmetics/accessories/dragon.svg');
 }
