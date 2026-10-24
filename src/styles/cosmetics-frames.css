@@ -142,7 +142,11 @@
   78%, 100% { transform: translateY(-87.5%); }
 }
 
-/* --- Glitch RGB (platine) : franges rouge / cyan qui sautent, blocs de pixels. */
+/* --- Glitch RGB (platine) : le contour rouge et le contour cyan sautent. ----- */
+/* Les deux couches portent le même contour (rongé, tranches décalées, blocs de
+   pixels). En mode « screen », là où elles se superposent elles font du blanc ;
+   leur léger décalage donne les franges rouge / cyan. Par moments, elles
+   sautent chacune de leur côté (le contour se dédouble), puis se recalent. */
 .cos-frame[data-frame='glitch'] {
   background-image: url('/cosmetics/frames/glitch.svg');
   overflow: hidden;
@@ -151,40 +155,41 @@
 .cos-frame[data-frame='glitch']::after {
   content: '';
   position: absolute;
-  left: 0;
-  width: 100%;
-  top: 0;
+  inset: 0;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
 }
 .cos-frame[data-frame='glitch']::before {
-  height: 100%;
-  background: url('/cosmetics/frames/glitch-rgb.svg') center / contain no-repeat;
-  animation: cos-glitch-jump 4.6s steps(1, end) infinite;
+  background-image: url('/cosmetics/frames/glitch-r.svg');
+  transform: translate(-0.7%, -0.3%);
+  animation: cos-glitch-red 4.6s steps(1, end) infinite;
 }
-/* Planche de 5 images : 0 = calme (figé), 1 à 4 = rafales, calées sur les sauts. */
 .cos-frame[data-frame='glitch']::after {
-  height: 500%;
-  background: url('/cosmetics/frames/glitch-blocks.svg') 0 0 / 100% 100% no-repeat;
-  animation: cos-glitch-blocks 4.6s steps(1, end) infinite;
+  background-image: url('/cosmetics/frames/glitch-c.svg');
+  transform: translate(0.7%, 0.3%);
+  animation: cos-glitch-cyan 4.6s steps(1, end) infinite;
 }
-@keyframes cos-glitch-jump {
-  0%, 70% { transform: none; }
-  72% { transform: translate(-2.4%, 0.8%); }
-  74.5% { transform: translate(2%, -1.2%); }
-  77% { transform: translate(-0.8%, 0); }
-  79%, 88% { transform: none; }
-  90% { transform: translate(2.8%, 0.8%); }
-  92.5% { transform: translate(-1.6%, -0.8%); }
-  95%, 100% { transform: none; }
+@keyframes cos-glitch-red {
+  0%, 70% { transform: translate(-0.7%, -0.3%); }
+  72% { transform: translate(-3.4%, 0.8%); }
+  74.5% { transform: translate(0.6%, -1.8%); }
+  77% { transform: translate(-2.2%, 0); }
+  79%, 88% { transform: translate(-0.7%, -0.3%); }
+  90% { transform: translate(2.2%, 1%); }
+  92.5% { transform: translate(-3.6%, -0.6%); }
+  95%, 100% { transform: translate(-0.7%, -0.3%); }
 }
-@keyframes cos-glitch-blocks {
-  0%, 70% { transform: translateY(0); }
-  72% { transform: translateY(-20%); }
-  74.5% { transform: translateY(-40%); }
-  77% { transform: translateY(-60%); }
-  79%, 88% { transform: translateY(0); }
-  90% { transform: translateY(-80%); }
-  92.5% { transform: translateY(-20%); }
-  95%, 100% { transform: translateY(0); }
+@keyframes cos-glitch-cyan {
+  0%, 70% { transform: translate(0.7%, 0.3%); }
+  72% { transform: translate(3%, -1%); }
+  74.5% { transform: translate(-1.2%, 1.6%); }
+  77% { transform: translate(2.6%, 0.4%); }
+  79%, 88% { transform: translate(0.7%, 0.3%); }
+  90% { transform: translate(-2.8%, -0.8%); }
+  92.5% { transform: translate(3.4%, 0.8%); }
+  95%, 100% { transform: translate(0.7%, 0.3%); }
 }
 
 /* --- Holographique (platine) : irisé pastel, un reflet passe en diagonale. --- */

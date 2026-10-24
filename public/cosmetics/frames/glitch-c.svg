@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+<defs><pattern id="s" width="4" height="2" patternUnits="userSpaceOnUse"><rect width="4" height="1.45" fill="#fff"/></pattern><mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="130" height="130"><rect width="130" height="130" fill="url(#s)"/></mask></defs>
+<g shape-rendering="crispEdges" fill="#00f0ff">
+<path d="M8.5 8.5h65.5v4h-65.5zM74 6.3h18v4h-18zM92 8.5h29.5v4h-29.5zM8.5 117.5h21.5v4h-21.5zM30 119.1h11v4h-11zM41 117.5h80.5v4h-80.5zM8.5 12.5h4v25.5h-4zM11.9 38h4v7h-4zM8.5 45h4v72.5h-4zM117.5 12.5h4v71.5h-4zM120.1 84h4v5h-4zM117.5 89h4v28.5h-4z" mask="url(#m)"/><path d="M19.4 19.4h91.2v1.2h-91.2zM19.4 109.4h10.6v1.2h-10.6zM46 109.4h64.6v1.2h-64.6zM19.4 19.4h1.2v38.6h-1.2zM19.4 71h1.2v39.6h-1.2zM109.4 19.4h1.2v91.2h-1.2z" opacity=".85"/><path d="M114.71 34.63h3v1h-3zM93.27 21.27h1.5v1h-1.5zM10.78 121.31h4v1h-4zM2.59 40.44h1.5v2h-1.5zM87.34 124.22h1.5v2h-1.5zM88.41 15.28h2v1h-2zM19.07 87.13h6v2h-6zM122.41 38.98h6v1h-6zM13.47 118.2h1.5v1.5h-1.5z"/>
+</g></svg>
