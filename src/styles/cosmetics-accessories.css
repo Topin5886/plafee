@@ -287,3 +287,69 @@
   91% { transform: translateX(-77.778%); }
   93% { transform: none; }
 }
+
+/* --- Dragon pixel (platine) -------------------------------------------------------------
+   Enroulé sur le coin haut-gauche : la queue descend le long du bord gauche, la
+   tête se dresse sur le bord du haut. Il cligne de l'oeil, bat des ailes, puis
+   souffle une flammèche vers la droite (le long du bord, jamais vers le visage).
+   ::before = aile proche + clin d'oeil (planche de 4 images),
+   ::after = souffle (planche de 10 images) ; les deux sur le même cycle de 8 s. */
+.cos-acc[data-acc='dragon'] {
+  top: -15%; left: -15%; right: auto; bottom: auto;
+  width: 80%; height: 62%;
+  overflow: hidden;
+  background-image: url('/cosmetics/accessories/dragon.svg');
+}
+.cos-acc[data-acc='dragon']::before,
+.cos-acc[data-acc='dragon']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-position: 0 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.cos-acc[data-acc='dragon']::before {
+  width: 400%;
+  background-image: url('/cosmetics/accessories/dragon-wing.svg');
+  animation: cos-dragon-wing 8s step-end infinite;
+}
+.cos-acc[data-acc='dragon']::after {
+  width: 1000%;
+  background-image: url('/cosmetics/accessories/dragon-fire.svg');
+  animation: cos-dragon-fire 8s step-end infinite;
+}
+@keyframes cos-dragon-wing {
+  0% { transform: none; }
+  /* clin d'oeil */
+  26% { transform: translateX(-75%); }
+  28% { transform: none; }
+  /* deux battements d'aile avant de souffler */
+  50% { transform: translateX(-25%); }
+  52.5% { transform: none; }
+  55% { transform: translateX(-50%); }
+  57.5% { transform: translateX(-25%); }
+  60% { transform: none; }
+  62.5% { transform: translateX(-50%); }
+  65% { transform: none; }
+  /* clin d'oeil */
+  92% { transform: translateX(-75%); }
+  94% { transform: none; }
+}
+@keyframes cos-dragon-fire {
+  0% { transform: none; }
+  66% { transform: translateX(-10%); }
+  67.5% { transform: translateX(-20%); }
+  69% { transform: translateX(-30%); }
+  71% { transform: translateX(-40%); }
+  73% { transform: translateX(-50%); }
+  75% { transform: translateX(-40%); }
+  77% { transform: translateX(-50%); }
+  79% { transform: translateX(-60%); }
+  81% { transform: translateX(-70%); }
+  83% { transform: translateX(-80%); }
+  86% { transform: translateX(-90%); }
+  89% { transform: none; }
+}
