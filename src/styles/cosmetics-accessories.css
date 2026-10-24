@@ -2,24 +2,30 @@
    Accessoires de photo de profil (calque .cos-acc, voir cosmetics-base.css).
    ===========================================================================
    Chaque objet fixe sa place et sa taille en % de la photo : posé sur un bord
-   ou un coin, jamais plus de 15 % de débordement, jamais sur le visage (le
-   carré central de 22 % à 78 % reste libre). Dessins en pixel art dans
-   public/cosmetics/accessories/ ; animations en transform/opacity seulement,
-   et la version figée (petit avatar, mode calme) est complète.
+   ou un coin, jamais plus de 15 % de débordement (y compris pendant les
+   animations), jamais sur le visage (le carré central de 22 % à 78 % reste
+   libre). Dessins en pixel art, contour sombre pour rester lisibles par-dessus
+   un cadre, dans public/cosmetics/accessories/.
+
+   Animations : transform et opacity uniquement, une ou deux couches par objet.
+   Les « planches » (token, crown, dragon) sont des bandes d'images côte à côte
+   qu'un pseudo-élément fait défiler image par image (translateX + step-end),
+   l'objet coupant ce qui dépasse (overflow: hidden). Image 0 = repos : quand
+   les animations sont coupées, l'objet reste complet.
    =========================================================================== */
 
-/* --- Chat qui dépasse (bronze) ----------------------------------------------------------
-   La tête est coupée au ras du bord du haut, les pattes s'y accrochent. Il cligne. */
+/* --- Chat (bronze) ----------------------------------------------------------------------
+   Couché sur le bord du haut, tête et pattes qui pendent par-dessus. Il cligne. */
 .cos-acc[data-acc='cat'] {
-  top: -15%; left: 31.667%; right: auto; bottom: auto;
-  width: 36.667%; height: 20%;
+  top: -15%; left: 31.1%; right: auto; bottom: auto;
+  width: 46.2%; height: 33.6%;
   background-image: url('/cosmetics/accessories/cat.svg');
 }
 .cos-acc[data-acc='cat']::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: url('/cosmetics/accessories/cat-blink.svg') center / contain no-repeat;
+  background: url('/cosmetics/accessories/cat-blink.svg') center / 100% 100% no-repeat;
   opacity: 0;
   animation: cos-cat-blink 5.5s step-end infinite;
 }
@@ -64,4 +70,220 @@
   92% { transform: translateX(1.5%) rotate(1.5deg); }
   94% { transform: translateX(-0.8%) rotate(-1deg); }
   96% { transform: none; }
+}
+
+/* --- Casquette à l'envers (argent) ------------------------------------------------------
+   Dôme sur le bord du haut, visière vers l'arrière ; elle se penche de temps en temps. */
+.cos-acc[data-acc='cap'] {
+  top: -15%; left: 23.6%; right: auto; bottom: auto;
+  width: 60%; height: 31.2%;
+  background-image: url('/cosmetics/accessories/cap.svg');
+  transform-origin: 44% 88%;
+  animation: cos-cap-tilt 5s ease-in-out infinite;
+}
+@keyframes cos-cap-tilt {
+  0%, 78%, 100% { transform: none; }
+  85% { transform: rotate(-5deg); }
+  92% { transform: rotate(2deg); }
+  96% { transform: none; }
+}
+
+/* --- Casque gaming (argent) -------------------------------------------------------------
+   Arceau sur le bord du haut, oreillettes sur les bords ; la LED verte respire. */
+.cos-acc[data-acc='headset'] {
+  top: -15%; left: -15%; right: auto; bottom: auto;
+  width: 130%; height: 60%;
+  background-image: url('/cosmetics/accessories/headset.svg');
+}
+.cos-acc[data-acc='headset']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/accessories/headset-led.svg') center / 100% 100% no-repeat;
+  animation: cos-headset-led 1.8s ease-in-out infinite;
+}
+@keyframes cos-headset-led {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+/* --- Cornes de diable (argent) ----------------------------------------------------------
+   Deux cornes sur le bord du haut, une lueur rouge qui pulse autour. */
+.cos-acc[data-acc='horns'] {
+  top: -15%; left: 7.5%; right: auto; bottom: auto;
+  width: 85%; height: 30%;
+  background-image: url('/cosmetics/accessories/horns.svg');
+}
+.cos-acc[data-acc='horns']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/accessories/horns-glow.svg') center / 100% 100% no-repeat;
+  opacity: 0.6;
+  animation: cos-horns-glow 2.4s ease-in-out infinite alternate;
+}
+@keyframes cos-horns-glow {
+  from { opacity: 0.15; }
+  to { opacity: 1; }
+}
+
+/* --- Lunettes pixel (argent) ------------------------------------------------------------
+   « Deal with it », posées sur le bord du haut (sur la tête, pas sur les yeux) ;
+   une étoile brille sur le verre de temps en temps. */
+.cos-acc[data-acc='shades'] {
+  top: -12%; left: 18.8%; right: auto; bottom: auto;
+  width: 62.4%; height: 19.2%;
+  background-image: url('/cosmetics/accessories/shades.svg');
+}
+.cos-acc[data-acc='shades']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/accessories/shades-glint.svg') center / 100% 100% no-repeat;
+  opacity: 0;
+  transform-origin: 17.3% 43.75%;
+  animation: cos-shades-glint 3.6s ease-in-out infinite;
+}
+@keyframes cos-shades-glint {
+  0%, 70%, 100% { opacity: 0; transform: scale(0.3); }
+  80% { opacity: 1; transform: none; }
+  90% { opacity: 0; transform: scale(0.5); }
+}
+
+/* --- Jeton P4 Forge (or) ----------------------------------------------------------------
+   Coin bas-gauche ; un éclat traverse le jeton, puis une étoile scintille.
+   Planche de 10 images (0 = repos). */
+.cos-acc[data-acc='token'] {
+  left: -15%; bottom: -15%; top: auto; right: auto;
+  width: 36%; height: 36%;
+  overflow: hidden;
+  background-image: url('/cosmetics/accessories/token.svg');
+}
+.cos-acc[data-acc='token']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1000%;
+  height: 100%;
+  background: url('/cosmetics/accessories/token-shine.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-token-shine 5s step-end infinite;
+}
+@keyframes cos-token-shine {
+  0% { transform: none; }
+  70% { transform: translateX(-10%); }
+  72% { transform: translateX(-20%); }
+  74% { transform: translateX(-30%); }
+  76% { transform: translateX(-40%); }
+  78% { transform: translateX(-50%); }
+  80% { transform: translateX(-60%); }
+  82% { transform: translateX(-70%); }
+  84% { transform: none; }
+  88% { transform: translateX(-80%); }
+  90% { transform: translateX(-90%); }
+  93% { transform: translateX(-80%); }
+  95% { transform: none; }
+}
+
+/* --- Bouteille de la Roulette (or) ------------------------------------------------------
+   Coin bas-droit, goulot vers la photo ; de temps en temps elle fait deux tours
+   et s'arrête au même endroit. Elle tient dans le cercle inscrit de sa boîte,
+   donc rien ne dépasse pendant la rotation. */
+.cos-acc[data-acc='bottle'] {
+  right: -15%; bottom: -15%; top: auto; left: auto;
+  width: 36%; height: 36%;
+  background-image: url('/cosmetics/accessories/bottle.svg');
+  animation: cos-bottle-spin 7s ease-in-out infinite;
+}
+.cos-acc[data-acc='bottle']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/accessories/bottle-swoosh.svg') center / 100% 100% no-repeat;
+  opacity: 0;
+  animation: cos-bottle-swoosh 7s linear infinite;
+}
+@keyframes cos-bottle-spin {
+  0%, 66% { transform: none; animation-timing-function: cubic-bezier(0.25, 0.7, 0.3, 1); }
+  90% { transform: rotate(714deg); }
+  95% { transform: rotate(723deg); }
+  100% { transform: rotate(720deg); }
+}
+@keyframes cos-bottle-swoosh {
+  0%, 66% { opacity: 0; }
+  70%, 78% { opacity: 1; }
+  88%, 100% { opacity: 0; }
+}
+
+/* --- Auréole (or) -----------------------------------------------------------------------
+   Anneau doré qui flotte au-dessus du bord du haut, avec une lueur qui respire. */
+.cos-acc[data-acc='halo'] {
+  top: -15%; left: 18%; right: auto; bottom: auto;
+  width: 64%; height: 22%;
+  background-image: url('/cosmetics/accessories/halo.svg');
+  animation: cos-halo-float 3.2s ease-in-out infinite alternate;
+}
+.cos-acc[data-acc='halo']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/accessories/halo-glow.svg') center / 100% 100% no-repeat;
+  opacity: 0.75;
+  animation: cos-halo-glow 1.6s ease-in-out infinite alternate;
+}
+@keyframes cos-halo-float {
+  from { transform: none; }
+  to { transform: translateY(12%); }
+}
+@keyframes cos-halo-glow {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+/* --- Couronne pixel (platine) -----------------------------------------------------------
+   Posée sur le bord du haut ; un éclat traverse l'or et des étoiles scintillent
+   sur les perles et les joyaux. Planche de 18 images (0 = repos). */
+.cos-acc[data-acc='crown'] {
+  top: -15%; left: 23.6%; right: auto; bottom: auto;
+  width: 52.8%; height: 33%;
+  overflow: hidden;
+  background-image: url('/cosmetics/accessories/crown.svg');
+}
+.cos-acc[data-acc='crown']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1800%;
+  height: 100%;
+  background: url('/cosmetics/accessories/crown-shine.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-crown-shine 6s step-end infinite;
+}
+@keyframes cos-crown-shine {
+  0% { transform: none; }
+  /* étoile sur la perle de droite */
+  28% { transform: translateX(-83.333%); }
+  30% { transform: translateX(-88.889%); }
+  33% { transform: translateX(-94.444%); }
+  35% { transform: none; }
+  /* étoile sur la perle du milieu */
+  48% { transform: translateX(-50%); }
+  50% { transform: translateX(-55.556%); }
+  53% { transform: translateX(-61.111%); }
+  55% { transform: none; }
+  /* l'éclat traverse la couronne */
+  62% { transform: translateX(-5.556%); }
+  64% { transform: translateX(-11.111%); }
+  66% { transform: translateX(-16.667%); }
+  68% { transform: translateX(-22.222%); }
+  70% { transform: translateX(-27.778%); }
+  72% { transform: translateX(-33.333%); }
+  74% { transform: translateX(-38.889%); }
+  76% { transform: translateX(-44.444%); }
+  78% { transform: none; }
+  /* étoile sur le rubis */
+  86% { transform: translateX(-66.667%); }
+  88% { transform: translateX(-72.222%); }
+  91% { transform: translateX(-77.778%); }
+  93% { transform: none; }
 }
