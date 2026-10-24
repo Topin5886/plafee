@@ -1,0 +1,67 @@
+/* ===========================================================================
+   Accessoires de photo de profil (calque .cos-acc, voir cosmetics-base.css).
+   ===========================================================================
+   Chaque objet fixe sa place et sa taille en % de la photo : posé sur un bord
+   ou un coin, jamais plus de 15 % de débordement, jamais sur le visage (le
+   carré central de 22 % à 78 % reste libre). Dessins en pixel art dans
+   public/cosmetics/accessories/ ; animations en transform/opacity seulement,
+   et la version figée (petit avatar, mode calme) est complète.
+   =========================================================================== */
+
+/* --- Chat qui dépasse (bronze) ----------------------------------------------------------
+   La tête est coupée au ras du bord du haut, les pattes s'y accrochent. Il cligne. */
+.cos-acc[data-acc='cat'] {
+  top: -15%; left: 31.667%; right: auto; bottom: auto;
+  width: 36.667%; height: 20%;
+  background-image: url('/cosmetics/accessories/cat.svg');
+}
+.cos-acc[data-acc='cat']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/accessories/cat-blink.svg') center / contain no-repeat;
+  opacity: 0;
+  animation: cos-cat-blink 5.5s step-end infinite;
+}
+@keyframes cos-cat-blink {
+  0% { opacity: 0; }
+  88% { opacity: 1; }
+  90% { opacity: 0; }
+  93% { opacity: 1; }
+  95% { opacity: 0; }
+}
+
+/* --- Bulle « GG » (bronze) --------------------------------------------------------------
+   Coin haut-droit, la pointe vers la photo ; petit rebond de temps en temps. */
+.cos-acc[data-acc='gg'] {
+  top: -12%; right: -15%; left: auto; bottom: auto;
+  width: 40%; height: 31.111%;
+  background-image: url('/cosmetics/accessories/gg.svg');
+  transform-origin: 100% 100%;
+  animation: cos-gg-bounce 3.4s ease-in-out infinite;
+}
+@keyframes cos-gg-bounce {
+  0%, 60%, 100% { transform: none; }
+  68% { transform: translateY(-8%); }
+  76% { transform: scale(1, 0.94); }
+  82% { transform: translateY(-3%); }
+  88% { transform: none; }
+}
+
+/* --- Manette (bronze) -------------------------------------------------------------------
+   Coin bas-droit ; une petite vibration de temps en temps. */
+.cos-acc[data-acc='gamepad'] {
+  right: -12%; bottom: -13%; top: auto; left: auto;
+  width: 44%; height: 24%;
+  background-image: url('/cosmetics/accessories/gamepad.svg');
+  animation: cos-gamepad-rumble 4.2s linear infinite;
+}
+@keyframes cos-gamepad-rumble {
+  0%, 84%, 100% { transform: none; }
+  86% { transform: translateX(-1.5%) rotate(-2deg); }
+  88% { transform: translateX(1.5%) rotate(2deg); }
+  90% { transform: translateX(-1.5%) rotate(-2deg); }
+  92% { transform: translateX(1.5%) rotate(1.5deg); }
+  94% { transform: translateX(-0.8%) rotate(-1deg); }
+  96% { transform: none; }
+}
