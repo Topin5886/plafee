@@ -1,0 +1,300 @@
+/* ===========================================================================
+   Effets de photo de profil (calque .cos-effect, voir cosmetics-base.css).
+   ===========================================================================
+   La boîte de l'effet = la photo + 15 % de chaque côté, overflow hidden.
+   Dans les SVG (viewBox 130 x 130), la photo occupe 15..115 et le visage
+   37..93 : on y passe peu, petit et transparent.
+
+   Technique : le dessin vit dans des SVG (public/cosmetics/effects/), posés
+   en fond de l'élément (couche fixe) et de ::before / ::after (couches
+   animées, 2 au plus). Les chutes/montées utilisent une tuile verticale
+   (repeat-y) sur un pseudo-élément plus haut que la boîte, qu'on décale
+   d'exactement une tuile : la boucle est sans couture. Seuls transform et
+   opacity sont animés (composités par le GPU, rien n'est repeint).
+
+   Figé (petit avatar, html[data-fx='calm'], mouvement réduit) : sans
+   animation, chaque couche reste à sa place de repos, choisie pour que
+   l'effet soit complet (particules visibles, halo allumé).
+   =========================================================================== */
+
+.cos-effect:is([data-effect='bubbles'], [data-effect='snow'], [data-effect='coins'],
+  [data-effect='petals'], [data-effect='crt'], [data-effect='smoke'], [data-effect='stars'],
+  [data-effect='hologram'], [data-effect='aura'])::before,
+.cos-effect:is([data-effect='snow'], [data-effect='coins'], [data-effect='petals'],
+  [data-effect='crt'], [data-effect='smoke'], [data-effect='stars'], [data-effect='hologram'],
+  [data-effect='aura'])::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 100% 100%;
+}
+
+/* --- Bulles (bronze) : quelques bulles qui montent en se balançant -------- */
+.cos-effect[data-effect='bubbles']::before {
+  left: 0; top: 0; width: 100%; height: 200%;
+  background-image: url('/cosmetics/effects/bubbles.svg');
+  background-size: 100% 50%;
+  background-repeat: repeat-y;
+  animation: cos-bubbles-rise 12s linear infinite;
+}
+@keyframes cos-bubbles-rise {
+  0%    { transform: translate(0, 0); }
+  12.5% { transform: translate(1.1%, -6.25%); }
+  25%   { transform: translate(1.5%, -12.5%); }
+  37.5% { transform: translate(1.1%, -18.75%); }
+  50%   { transform: translate(0, -25%); }
+  62.5% { transform: translate(-1.1%, -31.25%); }
+  75%   { transform: translate(-1.5%, -37.5%); }
+  87.5% { transform: translate(-1.1%, -43.75%); }
+  100%  { transform: translate(0, -50%); }
+}
+
+/* --- Neige pixel (argent) : deux rideaux de flocons, proche et lointain --- */
+.cos-effect[data-effect='snow']::before,
+.cos-effect[data-effect='snow']::after {
+  left: 0; top: -100%; width: 100%; height: 200%;
+  background-size: 100% 50%;
+  background-repeat: repeat-y;
+}
+.cos-effect[data-effect='snow']::before {
+  background-image: url('/cosmetics/effects/snow.svg');
+  opacity: 0.9;
+  animation: cos-snow-fall 9s linear infinite;
+}
+.cos-effect[data-effect='snow']::after {
+  background-image: url('/cosmetics/effects/snow-far.svg');
+  opacity: 0.55;
+  animation: cos-snow-fall-far 15s linear infinite;
+}
+@keyframes cos-snow-fall {
+  0%    { transform: translate(0, 0); }
+  25%   { transform: translate(1.6%, 12.5%); }
+  50%   { transform: translate(0, 25%); }
+  75%   { transform: translate(-1.6%, 37.5%); }
+  100%  { transform: translate(0, 50%); }
+}
+@keyframes cos-snow-fall-far {
+  0%    { transform: translate(0, 0); }
+  25%   { transform: translate(-1%, 12.5%); }
+  50%   { transform: translate(0, 25%); }
+  75%   { transform: translate(1%, 37.5%); }
+  100%  { transform: translate(0, 50%); }
+}
+
+/* --- Pluie de pièces FEES (argent) : une averse, un silence, une averse --- */
+/* ::before : tuile de 2 boîtes (pièces dans la moitié basse, visible à l'arrêt) ;
+   ::after : tuile de 3 boîtes, quelques pièces isolées à un autre rythme. */
+.cos-effect[data-effect='coins']::before {
+  left: 0; top: -300%; width: 100%; height: 400%;
+  background-image: url('/cosmetics/effects/coins.svg');
+  background-size: 100% 50%;
+  background-repeat: repeat-y;
+  animation: cos-coins-fall 7s linear infinite;
+}
+.cos-effect[data-effect='coins']::after {
+  left: 0; top: -500%; width: 100%; height: 600%;
+  background-image: url('/cosmetics/effects/coins-b.svg');
+  background-size: 100% 50%;
+  background-repeat: repeat-y;
+  animation: cos-coins-fall 11s linear infinite;
+}
+@keyframes cos-coins-fall {
+  from { transform: translateY(0); }
+  to   { transform: translateY(50%); }
+}
+
+/* --- Pétales (argent) : vol en diagonale, deux plans ---------------------- */
+.cos-effect[data-effect='petals']::before {
+  left: -100%; top: -100%; width: 200%; height: 200%;
+  background-image: url('/cosmetics/effects/petals.svg');
+  background-size: 50% 50%;
+  background-repeat: repeat;
+  animation: cos-petals-drift 11s linear infinite;
+}
+.cos-effect[data-effect='petals']::after {
+  left: -100%; top: -200%; width: 200%; height: 300%;
+  background-image: url('/cosmetics/effects/petals-far.svg');
+  background-size: 50% 33.3333%;
+  background-repeat: repeat;
+  opacity: 0.7;
+  animation: cos-petals-drift-far 15s linear infinite;
+}
+@keyframes cos-petals-drift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(13.6%, 11.4%); }
+  50%  { transform: translate(25%, 25%); }
+  75%  { transform: translate(36.4%, 38.6%); }
+  100% { transform: translate(50%, 50%); }
+}
+@keyframes cos-petals-drift-far {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(11.5%, 17.4%); }
+  50%  { transform: translate(25%, 33.3333%); }
+  75%  { transform: translate(38.5%, 49.3%); }
+  100% { transform: translate(50%, 66.6667%); }
+}
+
+/* --- Scan lines CRT (or) ------------------------------------------------- */
+/* fond : vignette d'écran + lueur de phosphore ; ::before : lignes fines (en px,
+   nettes à toutes les tailles) ; ::after : la barre lumineuse qui défile. */
+.cos-effect[data-effect='crt'] {
+  background-image: url('/cosmetics/effects/crt.svg');
+}
+.cos-effect[data-effect='crt']::before {
+  inset: 11.5385%;
+  background-image: url('/cosmetics/effects/crt-lines.svg');
+  background-size: 100% 3px;
+  background-repeat: repeat-y;
+  animation: cos-crt-flicker 7s steps(1, end) infinite;
+}
+.cos-effect[data-effect='crt']::after {
+  left: 11.5385%; right: 11.5385%; top: 30%; height: 14%;
+  background-image: url('/cosmetics/effects/crt-bar.svg');
+  animation: cos-crt-sweep 5.5s linear infinite;
+}
+@keyframes cos-crt-flicker {
+  0%, 100% { opacity: 1; }
+  41% { opacity: 0.7; }
+  42% { opacity: 1; }
+  43.5% { opacity: 0.82; }
+  45% { opacity: 1; }
+}
+@keyframes cos-crt-sweep {
+  0%   { transform: translateY(-223.9%); opacity: 0; }
+  7%   { opacity: 1; }
+  64%  { opacity: 1; }
+  70%  { transform: translateY(325.6%); opacity: 0; }
+  100% { transform: translateY(325.6%); opacity: 0; }
+}
+
+/* --- Aura sombre (or) : halo violet fixe + deux couches de volutes -------- */
+/* Les volutes longent les bords de la photo ; les deux couches se balancent
+   en sens contraire (rotation de quelques degrés + respiration) : les bords
+   ondulent, le centre reste dégagé, et rien ne touche le bord de la boîte. */
+.cos-effect[data-effect='smoke'] {
+  background-image: url('/cosmetics/effects/smoke.svg');
+}
+.cos-effect[data-effect='smoke']::before,
+.cos-effect[data-effect='smoke']::after {
+  inset: 0;
+}
+.cos-effect[data-effect='smoke']::before {
+  background-image: url('/cosmetics/effects/smoke-a.svg');
+  animation: cos-smoke-sway 6s ease-in-out infinite alternate;
+}
+.cos-effect[data-effect='smoke']::after {
+  background-image: url('/cosmetics/effects/smoke-b.svg');
+  animation: cos-smoke-sway-back 8.5s ease-in-out infinite alternate;
+}
+@keyframes cos-smoke-sway {
+  from { transform: rotate(-5deg) scale(1.03); opacity: 0.75; }
+  to   { transform: rotate(5deg) scale(0.98); opacity: 1; }
+}
+@keyframes cos-smoke-sway-back {
+  from { transform: rotate(6deg) scale(0.98); opacity: 1; }
+  to   { transform: rotate(-6deg) scale(1.03); opacity: 0.8; }
+}
+
+/* --- Étoiles en orbite (platine) : 3 étoiles à traînée + scintillements -- */
+.cos-effect[data-effect='stars']::before {
+  inset: -10%;
+  background-image: url('/cosmetics/effects/stars.svg');
+  animation: cos-stars-orbit 14s linear infinite;
+}
+.cos-effect[data-effect='stars']::after {
+  inset: 0;
+  background-image: url('/cosmetics/effects/stars-twinkle.svg');
+  animation: cos-stars-twinkle 2.6s ease-in-out infinite alternate;
+}
+@keyframes cos-stars-orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes cos-stars-twinkle {
+  from { opacity: 0.2; }
+  to   { opacity: 1; }
+}
+
+/* --- Hologramme (platine) ------------------------------------------------ */
+/* fond : équerres, bord lumineux, projecteur et faisceau sous la photo ;
+   ::before : voile cyan + lignes, posé sur la photo seule, qui respire et
+   sursaute de côté de temps en temps ; ::after : une bande d'interférence
+   (cyan / magenta) qui remonte la photo, puis réapparaît décalée pendant les
+   sursauts. Cachée à l'arrêt (le fond et le voile suffisent). */
+.cos-effect[data-effect='hologram'] {
+  background-image: url('/cosmetics/effects/hologram.svg');
+}
+.cos-effect[data-effect='hologram']::before {
+  inset: 11.5385%;
+  background-image: url('/cosmetics/effects/hologram-veil.svg');
+  animation: cos-hologram-flicker 6s linear infinite;
+}
+.cos-effect[data-effect='hologram']::after {
+  left: 11.5385%; right: 11.5385%; top: 40%; height: 4.6154%;
+  background-image: url('/cosmetics/effects/hologram-glitch.svg');
+  opacity: 0;
+  animation: cos-hologram-glitch 6s linear infinite;
+}
+@keyframes cos-hologram-flicker {
+  0%     { opacity: 1; transform: translateX(0); }
+  20%    { opacity: 0.7; }
+  38%    { opacity: 1; transform: translateX(0); }
+  38.5%  { opacity: 0.5; transform: translateX(3%); }
+  39.2%  { opacity: 1; transform: translateX(-2%); }
+  39.8%  { opacity: 0.85; transform: translateX(0); }
+  62%    { opacity: 0.7; }
+  84%    { opacity: 1; transform: translateX(0); }
+  84.4%  { opacity: 0.55; transform: translateX(-2.5%); }
+  85%    { opacity: 1; transform: translateX(0); }
+  100%   { opacity: 1; transform: translateX(0); }
+}
+@keyframes cos-hologram-glitch {
+  0%     { opacity: 0; transform: translate(0, 950%); }
+  3%     { opacity: 0.5; }
+  27%    { opacity: 0.5; }
+  30%    { opacity: 0; transform: translate(0, -617%); }
+  37.9%  { opacity: 0; transform: translate(0, -260%); }
+  38%    { opacity: 1; transform: translate(5%, -260%); }
+  38.8%  { opacity: 1; transform: translate(-3%, -260%); }
+  39.6%  { opacity: 0; transform: translate(0, -260%); }
+  83.9%  { opacity: 0; transform: translate(0, 380%); }
+  84%    { opacity: 0.9; transform: translate(-4%, 380%); }
+  85%    { opacity: 0; transform: translate(0, 380%); }
+  100%   { opacity: 0; transform: translate(0, 950%); }
+}
+
+/* --- Aura arcade (divin) ------------------------------------------------- */
+/* ::before : trois halos en paliers empilés (vert, cyan, magenta). Le halo
+   pulse (opacité) et change de couleur au creux de chaque pulsation (saut de
+   transform en steps), sans animer de filtre. ::after : particules pixel qui
+   montent. À l'arrêt : halo vert allumé + particules. */
+.cos-effect[data-effect='aura'] {
+  background-image: url('/cosmetics/effects/aura.svg');
+}
+.cos-effect[data-effect='aura']::before {
+  left: 0; top: 0; width: 100%; height: 300%;
+  background-image: url('/cosmetics/effects/aura-halo.svg');
+  animation:
+    cos-aura-hue 7.5s steps(3, end) infinite,
+    cos-aura-pulse 2.5s ease-in-out infinite;
+}
+.cos-effect[data-effect='aura']::after {
+  left: 0; top: 0; width: 100%; height: 200%;
+  background-image: url('/cosmetics/effects/aura-particles.svg');
+  background-size: 100% 50%;
+  background-repeat: repeat-y;
+  animation: cos-aura-rise 6s linear infinite;
+}
+@keyframes cos-aura-hue {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+@keyframes cos-aura-pulse {
+  0%, 100% { opacity: 0.2; }
+  50%      { opacity: 1; }
+}
+@keyframes cos-aura-rise {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}

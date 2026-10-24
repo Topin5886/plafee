@@ -260,6 +260,8 @@ export const upsertShopItem = (i: {
   icon_url: string | null;
   payload: Record<string, unknown>;
   active: boolean;
+  /** '' retire la rareté ; absent, elle ne change pas. */
+  rarity?: string;
 }) =>
   rpc<string>('admin_upsert_shop_item', {
     p_id: i.id,
@@ -270,6 +272,7 @@ export const upsertShopItem = (i: {
     p_icon_url: i.icon_url,
     p_payload: i.payload,
     p_active: i.active,
+    p_rarity: i.rarity ?? null,
   });
 
 export interface AdminTransaction {

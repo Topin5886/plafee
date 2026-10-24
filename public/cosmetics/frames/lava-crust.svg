@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+<defs>
+<filter id="c" filterUnits="userSpaceOnUse" x="0" y="0" width="130" height="130" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="e"/>
+<feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="9"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0" result="n"/>
+<feComposite in="n" in2="e" operator="arithmetic" k2="1" k3=".5" k4="-.04"/>
+<feComponentTransfer result="m0"><feFuncA type="discrete" tableValues="0 0 0 0 0 1 1 1 1 1"/></feComponentTransfer>
+<feTurbulence type="turbulence" baseFrequency=".075" numOctaves="1" seed="5"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>
+<feComponentTransfer result="cr"><feFuncA type="discrete" tableValues="1 0 0 0 0 0 0 0 0 0 0 0 0 0"/></feComponentTransfer>
+<feComposite in="m0" in2="cr" operator="out" result="m"/>
+<feTurbulence type="fractalNoise" baseFrequency=".16" numOctaves="2" seed="2"/>
+<feColorMatrix type="matrix" values=".42 0 0 0 .06 .2 0 0 0 .02 .12 0 0 0 .01 0 0 0 0 1"/>
+<feComposite in2="m" operator="in" result="k"/>
+<feOffset in="m" dx=".7" dy=".7" result="o"/>
+<feComposite in="m" in2="o" operator="out" result="hm"/>
+<feFlood flood-color="#8a4a2c"/><feComposite in2="hm" operator="in" result="hl"/>
+<feMorphology in="m" operator="dilate" radius=".6" result="d"/>
+<feGaussianBlur in="m" stdDeviation="1.2" result="h"/>
+<feFlood flood-color="#ff4a00" flood-opacity=".8"/><feComposite in2="h" operator="in" result="hg"/>
+<feFlood flood-color="#ffb347"/><feComposite in2="d" operator="in" result="rim"/>
+<feMerge><feMergeNode in="hg"/><feMergeNode in="rim"/><feMergeNode in="k"/><feMergeNode in="hl"/></feMerge>
+</filter>
+<mask id="l" maskUnits="userSpaceOnUse" x="0" y="0" width="130" height="130"><path d="M0 0H130V130H0ZM22.5 18.5H107.5A4 4 0 0 1 111.5 22.5V107.5A4 4 0 0 1 107.5 111.5H22.5A4 4 0 0 1 18.5 107.5V22.5A4 4 0 0 1 22.5 18.5Z" fill="#fff" fill-rule="evenodd"/></mask>
+</defs>
+<g mask="url(#l)"><path d="M10.5 4.5H119.5A6 6 0 0 1 125.5 10.5V119.5A6 6 0 0 1 119.5 125.5H10.5A6 6 0 0 1 4.5 119.5V10.5A6 6 0 0 1 10.5 4.5ZM14 11H116A3 3 0 0 1 119 14V116A3 3 0 0 1 116 119H14A3 3 0 0 1 11 116V14A3 3 0 0 1 14 11Z" fill="#fff" fill-rule="evenodd" filter="url(#c)"/></g>
+</svg>

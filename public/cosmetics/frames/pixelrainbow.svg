@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+<defs><linearGradient id="g" x1="0" y1="0" x2="130" y2="130" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ff2a2a"/><stop offset="0.12" stop-color="#ff8a00"/><stop offset="0.25" stop-color="#ffe600"/><stop offset="0.38" stop-color="#00ff00"/><stop offset="0.5" stop-color="#00e5ff"/><stop offset="0.62" stop-color="#2f6bff"/><stop offset="0.75" stop-color="#9d00ff"/><stop offset="0.88" stop-color="#ff2bd6"/><stop offset="1" stop-color="#ff2a2a"/></linearGradient>
+<filter id="b" filterUnits="userSpaceOnUse" x="0" y="0" width="130" height="130"><feGaussianBlur stdDeviation="2.4"/></filter>
+<filter id="w" filterUnits="userSpaceOnUse" x="0" y="0" width="130" height="130"><feGaussianBlur stdDeviation="1.2"/></filter></defs>
+<path d="M10 5H120V10H125V120H120V125H10V120H5V10H10ZM25 25H105V105H25ZM25 25h5v5h-5zM100 25h5v5h-5zM100 100h5v5h-5zM25 100h5v5h-5z" fill="url(#g)" fill-rule="evenodd" stroke="url(#g)" stroke-width="3" filter="url(#b)"/>
+<path d="M10 5H120V10H125V120H120V125H10V120H5V10H10ZM25 25H105V105H25ZM25 25h5v5h-5zM100 25h5v5h-5zM100 100h5v5h-5zM25 100h5v5h-5z" fill="url(#g)" fill-rule="evenodd" stroke="url(#g)" stroke-width="2" filter="url(#w)"/>
+<path d="M10 5H120V10H125V120H120V125H10V120H5V10H10ZM25 25H105V105H25ZM25 25h5v5h-5zM100 25h5v5h-5zM100 100h5v5h-5zM25 100h5v5h-5z" fill="#160026" fill-rule="evenodd" stroke="#160026" stroke-width="2.4" stroke-linejoin="miter" shape-rendering="crispEdges"/>
+</svg>

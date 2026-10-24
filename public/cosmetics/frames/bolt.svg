@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+<defs><filter id="b" filterUnits="userSpaceOnUse" x="0" y="0" width="130" height="130"><feGaussianBlur stdDeviation="2.6"/></filter></defs>
+<rect x="12.5" y="12.5" width="105" height="105" rx="2" fill="none" stroke-width="7" stroke="#00e5ff" opacity=".42" filter="url(#b)"/>
+<rect x="12.5" y="12.5" width="105" height="105" rx="2" fill="none" stroke-width="3.2" stroke="#00ffff" opacity=".16"/>
+<rect x="12.5" y="12.5" width="105" height="105" rx="2" fill="none" stroke-width="0.7" stroke="#9ffcff" opacity=".55"/>
+<g fill="#0b1c26" stroke="#00ffff" stroke-width="1.2"><circle cx="12.5" cy="12.5" r="4.4"/><circle cx="117.5" cy="12.5" r="4.4"/><circle cx="117.5" cy="117.5" r="4.4"/><circle cx="12.5" cy="117.5" r="4.4"/></g>
+<g fill="#e8ffff"><circle cx="12.5" cy="12.5" r="1.6"/><circle cx="117.5" cy="12.5" r="1.6"/><circle cx="117.5" cy="117.5" r="1.6"/><circle cx="12.5" cy="117.5" r="1.6"/></g>
+</svg>

@@ -1,0 +1,154 @@
+/* ===========================================================================
+   Cosmétiques d'avatar : les 3 emplacements (cadre, accessoire, effet).
+   ===========================================================================
+   Chaque avatar habillé (.soc-avatar sur le site, .cos-seat en partie) reçoit
+   jusqu'à trois calques, rendus par components/AvatarCosmetics.tsx :
+
+     <span class="cos-frame"  data-frame="ID">   cadre, sous les autres
+     <span class="cos-acc"    data-acc="ID">     accessoire, posé sur un bord
+     <span class="cos-effect" data-effect="ID">  effet, tout en haut
+
+   Règles communes :
+   - rien ne dépasse de plus de 15 % de la taille de la photo, de chaque côté ;
+   - les accessoires restent sur les bords : le centre de la photo (le visage)
+     reste libre ;
+   - le visuel d'origine est un fond (background) ou un pseudo-élément ; un
+     visuel envoyé depuis l'admin arrive en <img> avec la classe .cos-custom,
+     qui coupe le visuel d'origine ;
+   - petit avatar (moins de 40 px, attribut data-small sur l'hôte), animations
+     coupées par le joueur (html[data-fx='calm']) ou par le système
+     (prefers-reduced-motion) : tout est figé.
+
+   Les dessins eux-mêmes vivent dans cosmetics-frames.css,
+   cosmetics-accessories.css et cosmetics-effects.css, et leurs fichiers dans
+   public/cosmetics/{frames,accessories,effects}/.
+   =========================================================================== */
+
+.cos-frame,
+.cos-acc,
+.cos-effect {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Le cadre : une boîte de la photo + 15 % de chaque côté. */
+.cos-frame { inset: -15%; z-index: 1; }
+/* L'accessoire : chaque objet fixe sa place (voir cosmetics-accessories.css),
+   par défaut un coin en haut à droite. */
+.cos-acc { top: -15%; right: -15%; width: 45%; height: 45%; z-index: 2; }
+/* L'effet : la même boîte que le cadre, et rien n'en sort. */
+.cos-effect { inset: -15%; z-index: 3; overflow: hidden; }
+
+/* Un visuel envoyé depuis l'admin remplace celui d'origine. */
+.cos-custom { background: none !important; animation: none !important; }
+.cos-custom::before,
+.cos-custom::after { display: none !important; }
+:is(.cos-frame, .cos-acc, .cos-effect).cos-custom > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* La pastille de statut et l'icône de badge restent lisibles par-dessus. */
+.soc-avatar .soc-presence, .soc-avatar .plf-avatar-badge { z-index: 4; }
+/* Avec un accessoire en haut à droite, le badge visuel passe en bas. */
+.soc-avatar[data-accessory] .plf-avatar-badge { top: auto; bottom: -6px; }
+.soc-avatar:is([data-accessory='gamepad'], [data-accessory='bottle']) .plf-avatar-badge { right: auto; left: -6px; }
+
+/* Tout figé : petit avatar, animations coupées, mouvement réduit. */
+[data-small] :is(.cos-frame, .cos-acc, .cos-effect),
+[data-small] :is(.cos-frame, .cos-acc, .cos-effect)::before,
+[data-small] :is(.cos-frame, .cos-acc, .cos-effect)::after,
+[data-small] :is(.cos-frame, .cos-acc, .cos-effect) *,
+html[data-fx='calm'] :is(.cos-frame, .cos-acc, .cos-effect),
+html[data-fx='calm'] :is(.cos-frame, .cos-acc, .cos-effect)::before,
+html[data-fx='calm'] :is(.cos-frame, .cos-acc, .cos-effect)::after,
+html[data-fx='calm'] :is(.cos-frame, .cos-acc, .cos-effect) * {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.cos-frame, .cos-acc, .cos-effect),
+  :is(.cos-frame, .cos-acc, .cos-effect)::before,
+  :is(.cos-frame, .cos-acc, .cos-effect)::after,
+  :is(.cos-frame, .cos-acc, .cos-effect) * {
+    animation: none !important;
+  }
+}
+
+/* Les plantes japonaises passent au rayon Cadres : mêmes fleurs, même place
+   (dans les coins de la photo, sans déborder). */
+.cos-frame[data-frame='flowers'],
+.cos-acc[data-acc='flowers'] { inset: 0; width: auto; height: auto; background-image: url('/cosmetics/flowers.svg'); }
+html[data-fx='calm'] :is(.cos-frame[data-frame='flowers'], .cos-acc[data-acc='flowers']),
+[data-small] :is(.cos-frame[data-frame='flowers'], .cos-acc[data-acc='flowers']) { background-image: url('/cosmetics/flowers-still.svg'); }
+@media (prefers-reduced-motion: reduce) {
+  .cos-frame[data-frame='flowers'], .cos-acc[data-acc='flowers'] { background-image: url('/cosmetics/flowers-still.svg'); }
+}
+
+/* Le nœud papillon garde sa place historique (classe .cos-bow, plafee-v2.css). */
+
+/* --- Rareté (boutique) -------------------------------------------------------------- */
+[data-rarity='bronze'] { --rarity: #cd7f32; --rarity-rgb: 205 127 50; }
+[data-rarity='argent'] { --rarity: #c0c0c0; --rarity-rgb: 192 192 192; }
+[data-rarity='or'] { --rarity: #ffd700; --rarity-rgb: 255 215 0; }
+[data-rarity='platine'] { --rarity: #e5e4e2; --rarity-rgb: 229 228 226; }
+[data-rarity='divin'] { --rarity: #9d00ff; --rarity-rgb: 157 0 255; }
+
+/* Les cartes de la boutique prennent la couleur de leur rareté. */
+.plf-shop-item[data-rarity] { position: relative; border-color: rgb(var(--rarity-rgb) / 0.55); }
+.plf-shop-item[data-rarity]:hover { border-color: var(--rarity); }
+.plf-shop-item[data-rarity][data-equipped] { border-color: var(--neon); }
+.plf-shop-item[data-rarity='divin'] { box-shadow: 0 0 14px rgb(157 0 255 / 0.35); animation: plf-divin-card 2.6s ease-in-out infinite; }
+.plf-shop-item[data-rarity='divin'][data-equipped] { box-shadow: var(--neon-glow); animation: none; }
+@keyframes plf-divin-card {
+  50% { box-shadow: 0 0 22px rgb(157 0 255 / 0.6); }
+}
+html[data-fx='calm'] .plf-shop-item[data-rarity='divin'] { animation: none; }
+@media (prefers-reduced-motion: reduce) { .plf-shop-item[data-rarity='divin'] { animation: none; } }
+
+.plf-rarity-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 6px;
+  border: 1px solid var(--rarity);
+  background: rgb(0 0 0 / 0.6);
+  color: var(--rarity);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  z-index: 5;
+}
+.plf-shop-item[data-rarity='divin'] .plf-rarity-tag { color: #d9a3ff; text-shadow: 0 0 6px #9d00ff; }
+
+/* Les filtres du rayon Profil. */
+.plf-shop-filters { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 16px; }
+.plf-shop-hint { margin: 0 0 10px; font-size: 13px; color: var(--ink-3); }
+.plf-shop-filters .plf-shop-hint { margin: 0; }
+.plf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.plf-chip {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--line-2);
+  background: var(--well);
+  color: var(--ink-2);
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.plf-chip:hover { border-color: rgb(var(--neon-rgb) / 0.7); color: var(--neon); }
+.plf-chip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.plf-chip[aria-pressed='true'] { border-color: var(--neon); color: var(--neon-ink, #000); background: var(--neon); }
+.plf-chip[data-rarity] { border-color: rgb(var(--rarity-rgb) / 0.6); color: var(--rarity); }
+.plf-chip[data-rarity][aria-pressed='true'] { background: var(--rarity); color: #000; }
+.plf-chip[data-rarity='divin'] { color: #c88bff; }
+.plf-chip[data-rarity='divin'][aria-pressed='true'] { color: #fff; }
+
+/* L'aperçu d'un objet de photo : la photo, un peu plus grande, avec de l'air. */
+.plf-shop-item .plf-prev-border { height: 112px; overflow: hidden; }
+.plf-chip-mini { font-family: var(--font-pixel); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rarity); }

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+<defs><linearGradient id="s" x1="44" y1="44" x2="92" y2="92" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#ff9ad5" stop-opacity="0"/><stop offset=".12" stop-color="#ff9ad5" stop-opacity=".55"/>
+<stop offset=".24" stop-color="#ffffff" stop-opacity=".95"/><stop offset=".33" stop-color="#ffffff" stop-opacity=".95"/>
+<stop offset=".44" stop-color="#7ff0ff" stop-opacity=".55"/><stop offset=".56" stop-color="#7ff0ff" stop-opacity="0"/>
+<stop offset=".66" stop-color="#ffffff" stop-opacity="0"/><stop offset=".72" stop-color="#ffffff" stop-opacity=".7"/>
+<stop offset=".78" stop-color="#ffffff" stop-opacity="0"/></linearGradient></defs>
+<rect width="130" height="130" fill="url(#s)"/>
+</svg>

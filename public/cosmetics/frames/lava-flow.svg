@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+<filter id="t" filterUnits="userSpaceOnUse" x="0" y="0" width="130" height="130" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency=".05 .017" numOctaves="3" seed="4" stitchTiles="stitch"/>
+<feColorMatrix type="matrix" values="2.6 0 0 0 -.82 2.6 0 0 0 -.82 2.6 0 0 0 -.82 0 0 0 0 1"/>
+<feComponentTransfer><feFuncR type="table" tableValues=".5 .78 .95 1 1 1"/><feFuncG type="table" tableValues=".03 .12 .3 .55 .8 .96"/><feFuncB type="table" tableValues="0 0 .02 .05 .22 .6"/></feComponentTransfer>
+</filter>
+<rect width="130" height="130" filter="url(#t)"/>
+</svg>

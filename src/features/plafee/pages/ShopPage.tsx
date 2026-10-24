@@ -8,7 +8,7 @@ import { UserAvatar } from '../../social/components/UserAvatar';
 import { achievementIcon } from '../../achievements/icons';
 import { usePlafee } from '../usePlafee';
 import { invalidateCosmetics } from '../useCosmetics';
-import { buyItem, equipItem, getMyPurchases, getShopItems, type Purchase, type ShopCategory, type ShopItem } from '../api';
+import { buyItem, equipItem, getMyPurchases, getShopItems, RARITIES, RARITY_LABELS, type Purchase, type Rarity, type ShopCategory, type ShopItem } from '../api';
 import { FeesAmount } from '../components/bits';
 import { formatFees } from '../format';
 import { celebrate, type VictoryAnim } from '../victory';
@@ -19,15 +19,30 @@ const TABS: { id: Tab; label: string; categories: ShopCategory[] }[] = [
   { id: 'cards', label: 'Cartes', categories: ['card_theme'] },
   { id: 'site', label: 'Site', categories: ['site_theme'] },
   { id: 'badges', label: 'Badges', categories: ['badge'] },
-  { id: 'profile', label: 'Profil', categories: ['profile_border', 'avatar_accessory', 'nameplate'] },
+  { id: 'profile', label: 'Profil', categories: ['profile_border', 'avatar_accessory', 'avatar_effect', 'nameplate'] },
   { id: 'anims', label: 'Animations', categories: ['victory_animation'] },
 ];
 
 const CATEGORY_TITLES: Partial<Record<ShopCategory, string>> = {
-  profile_border: 'Contours de profil',
-  avatar_accessory: 'Accessoires de photo',
+  profile_border: 'Cadres',
+  avatar_accessory: 'Accessoires',
+  avatar_effect: 'Effets',
   nameplate: 'Plaques nominatives',
 };
+
+/** Ce que chaque emplacement de photo fait, sous son titre. */
+const CATEGORY_HINTS: Partial<Record<ShopCategory, string>> = {
+  profile_border: 'Autour de ta photo.',
+  avatar_accessory: 'Posé sur un bord de ta photo.',
+  avatar_effect: 'Une animation par-dessus ta photo.',
+};
+
+/** Les trois emplacements de photo : un objet de chaque, portés en même temps. */
+const PHOTO_SLOTS: ShopCategory[] = ['profile_border', 'avatar_accessory', 'avatar_effect'];
+
+/** Défaut d'abord, puis de Bronze à Divin, puis par prix. */
+const rarityRank = (i: ShopItem) => (i.is_default ? -1 : i.rarity ? RARITIES.indexOf(i.rarity) : 99);
+const byRarity = (a: ShopItem, b: ShopItem) => rarityRank(a) - rarityRank(b) || a.price - b.price || a.sort_order - b.sort_order;
 
 /** La condition d'achat, en français. */
 function requirementText(req: Record<string, number>): string | null {
@@ -38,7 +53,7 @@ function requirementText(req: Record<string, number>): string | null {
 }
 
 /** L'aperçu d'un objet, selon ce qu'il change. */
-function ItemPreview({ item, username, avatar }: { item: ShopItem; username: string; avatar: string | null }) {
+function ItemPreview({ item, username, avatar, userId }: { item: ShopItem; username: string; avatar: string | null; userId: string | null }) {
   const p = item.payload as Record<string, string | boolean>;
   switch (item.category) {
     case 'card_theme':
@@ -56,16 +71,24 @@ function ItemPreview({ item, username, avatar }: { item: ShopItem; username: str
           <b>PLAFEE</b>
         </span>
       );
+    // Les objets de photo s'essaient sur ta photo, avec ce que tu portes déjà
+    // dans les deux autres emplacements.
     case 'profile_border':
       return (
         <span className="plf-prev-border" data-border-preview={String(p.border)} aria-hidden>
-          <UserAvatar username={username} src={avatar} size={56} preview={{ border: String(p.border) }} />
+          <UserAvatar username={username} src={avatar} userId={userId} size={64} preview={{ border: p.border ? String(p.border) : null, borderImg: item.icon_url }} />
         </span>
       );
     case 'avatar_accessory':
       return (
         <span className="plf-prev-border" aria-hidden>
-          <UserAvatar username={username} src={avatar} size={56} preview={{ accessory: p.accessory ? String(p.accessory) : null }} />
+          <UserAvatar username={username} src={avatar} userId={userId} size={64} preview={{ accessory: p.accessory ? String(p.accessory) : null, accessoryImg: item.icon_url }} />
+        </span>
+      );
+    case 'avatar_effect':
+      return (
+        <span className="plf-prev-border" aria-hidden>
+          <UserAvatar username={username} src={avatar} userId={userId} size={64} preview={{ effect: p.effect ? String(p.effect) : null, effectImg: item.icon_url }} />
         </span>
       );
     case 'nameplate':
@@ -98,6 +121,8 @@ export function ShopPage() {
   const [items, setItems] = useState<ShopItem[] | null>(null);
   const [owned, setOwned] = useState<Purchase[]>([]);
   const [tab, setTab] = useState<Tab>('cards');
+  const [slot, setSlot] = useState<ShopCategory | 'all'>('all');
+  const [rarity, setRarity] = useState<Rarity | 'all'>('all');
   const [error, setError] = useState<string | null>(null);
   const [buying, setBuying] = useState<ShopItem | null>(null);
   const [revealed, setRevealed] = useState<ShopItem | null>(null);
@@ -131,6 +156,8 @@ export function ShopPage() {
   const ownedById = useMemo(() => new Map(owned.map((p) => [p.item_id, p])), [owned]);
   const balance = wallet?.balance ?? 0;
   const current = TABS.find((t) => t.id === tab)!;
+  const isProfile = tab === 'profile';
+  const shownCategories = isProfile && slot !== 'all' ? [slot] : current.categories;
 
   /** Équipé : l'objet acheté marqué équipé, ou le défaut quand rien d'autre ne l'est. */
   const isEquipped = (item: ShopItem) => {
@@ -193,6 +220,32 @@ export function ShopPage() {
             ))}
           </div>
 
+          {isProfile && (
+            <div className="plf-shop-filters">
+              <p className="plf-shop-hint">Un cadre, un accessoire et un effet se portent en même temps.</p>
+              <div className="plf-chips" role="group" aria-label="Emplacement">
+                <button type="button" className="plf-chip" aria-pressed={slot === 'all'} onClick={() => setSlot('all')}>
+                  Tout
+                </button>
+                {[...PHOTO_SLOTS, 'nameplate' as ShopCategory].map((c) => (
+                  <button key={c} type="button" className="plf-chip" aria-pressed={slot === c} onClick={() => setSlot(c)}>
+                    {c === 'nameplate' ? 'Plaques' : CATEGORY_TITLES[c]}
+                  </button>
+                ))}
+              </div>
+              <div className="plf-chips" role="group" aria-label="Rareté">
+                <button type="button" className="plf-chip" aria-pressed={rarity === 'all'} onClick={() => setRarity('all')}>
+                  Toutes raretés
+                </button>
+                {RARITIES.map((r) => (
+                  <button key={r} type="button" className="plf-chip" data-rarity={r} aria-pressed={rarity === r} onClick={() => setRarity(r)}>
+                    {RARITY_LABELS[r]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {error && (
             <p className="neon-error" role="alert">
               {error}
@@ -204,11 +257,16 @@ export function ShopPage() {
               Chargement…
             </p>
           ) : (
-            current.categories.map((cat) => {
-              const list = items.filter((i) => i.category === cat);
+            shownCategories.map((cat) => {
+              const list = items
+                .filter((i) => i.category === cat)
+                .filter((i) => !isProfile || rarity === 'all' || i.rarity === rarity)
+                .sort(byRarity);
+              if (list.length === 0) return null;
               return (
                 <div key={cat} className="plf-shop-group">
                   {current.categories.length > 1 && <h2 className="ach-group-title">{CATEGORY_TITLES[cat]}</h2>}
+                  {isProfile && CATEGORY_HINTS[cat] && <p className="plf-shop-hint">{CATEGORY_HINTS[cat]}</p>}
                   <ul className="plf-shop-grid">
                     {list.map((item) => {
                       const mine = ownedById.get(item.id);
@@ -216,8 +274,15 @@ export function ShopPage() {
                       const req = requirementText(item.requirement ?? {});
                       const affordable = balance >= item.price;
                       return (
-                        <li key={item.id} className="plf-shop-item" data-equipped={equipped || undefined} data-owned={Boolean(mine) || item.is_default || undefined}>
-                          <ItemPreview item={item} username={profile?.username ?? 'Toi'} avatar={profile?.avatar ?? null} />
+                        <li
+                          key={item.id}
+                          className="plf-shop-item"
+                          data-rarity={item.rarity ?? undefined}
+                          data-equipped={equipped || undefined}
+                          data-owned={Boolean(mine) || item.is_default || undefined}
+                        >
+                          <ItemPreview item={item} username={profile?.username ?? 'Toi'} avatar={profile?.avatar ?? null} userId={uid} />
+                          {item.rarity && <span className="plf-rarity-tag">{RARITY_LABELS[item.rarity]}</span>}
                           <h3>{item.name}</h3>
                           {item.description && <p>{item.description}</p>}
                           {req && (
