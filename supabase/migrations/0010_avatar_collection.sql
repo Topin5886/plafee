@@ -204,3 +204,6 @@ $$;
 
 revoke all on function public.admin_upsert_shop_item(uuid, text, text, text, bigint, text, jsonb, boolean, text) from public, anon;
 grant execute on function public.admin_upsert_shop_item(uuid, text, text, text, bigint, text, jsonb, boolean, text) to authenticated;
+
+-- Les nouveaux accessoires restent cachés tant que leurs dessins ne sont pas en ligne.
+update public.shop_items set is_active = false where sku like 'acc\_%';
