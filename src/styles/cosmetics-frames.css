@@ -1,0 +1,256 @@
+/* ===========================================================================
+   Cadres de photo de profil (rayon Cadres de la boutique).
+   ===========================================================================
+   Chaque cadre est un <span class="cos-frame" data-frame="ID"> posé par
+   cosmetics-base.css sur la photo + 15 % de chaque côté (inset: -15 %).
+   Les dessins sont dans public/cosmetics/frames/ et partagent le même repère :
+   viewBox 0 0 130 130, la photo va de 15 à 115. Rien d'opaque au-delà de 27
+   (la photo n'est mordue que sur ses 12 % extérieurs), sauf les ornements de
+   coin, et jamais dans le carré central.
+
+   Le dessin = le fond de l'élément + ::before / ::after (coupés par
+   .cos-custom). Les couches animées ne bougent qu'en transform / opacity.
+   Les « planches » (circuit, éclairs, glitch, arc-en-ciel) sont des images
+   empilées en hauteur que l'on fait défiler par paliers (steps) : la 1re image
+   est la version figée, elle est complète à elle seule.
+   Figé (petit avatar, data-fx='calm', mouvement réduit) : géré par la base.
+   =========================================================================== */
+
+/* --- Néon PLAFEE (bronze) : tube vert, halo qui respire. --------------------- */
+.cos-frame[data-frame='neon'] { background-image: url('/cosmetics/frames/neon.svg'); }
+.cos-frame[data-frame='neon']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/frames/neon-glow.svg') center / contain no-repeat;
+  opacity: 0.85;
+  animation: cos-neon-pulse 2.6s ease-in-out infinite alternate;
+}
+@keyframes cos-neon-pulse {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+/* --- Givre (argent) : glace, flocons et stalactites, petits éclats. ---------- */
+.cos-frame[data-frame='frost'] { background-image: url('/cosmetics/frames/frost.svg'); }
+.cos-frame[data-frame='frost']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/frames/frost-glint.svg') center / contain no-repeat;
+  opacity: 0.8;
+  animation: cos-frost-glint 3.4s ease-in-out infinite alternate;
+}
+@keyframes cos-frost-glint {
+  from { opacity: 0.1; }
+  to { opacity: 1; }
+}
+
+/* --- Table de jeu (argent) : feutre casino, liserés dorés, rivets. ----------- */
+.cos-frame[data-frame='felt'] { background-image: url('/cosmetics/frames/felt.svg'); }
+
+/* --- Cartes à jouer (argent) : 4 cartes en biais sur les coins. -------------- */
+.cos-frame[data-frame='cards'] { background-image: url('/cosmetics/frames/cards.svg'); }
+
+/* --- Circuit imprimé (or) : les pastilles s'allument une à une. -------------- */
+/* Planche de 13 images : 0 = tout allumé (figé), 1 à 12 = une pastille à la fois. */
+.cos-frame[data-frame='circuit'] {
+  background-image: url('/cosmetics/frames/circuit.svg');
+  overflow: hidden;
+}
+.cos-frame[data-frame='circuit']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1300%;
+  background: url('/cosmetics/frames/circuit-light.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-circuit-run 3.9s steps(13) infinite;
+}
+@keyframes cos-circuit-run {
+  to { transform: translateY(-100%); }
+}
+
+/* --- Lave (or) : la coulée passe sous la croûte. ----------------------------- */
+/* Le cadre est découpé par sa propre forme (masque) : la texture en fusion,
+   plus grande, glisse vers le bas sans jamais sortir de l'anneau. Sans masque
+   (vieux navigateur), pas de coulée : il reste la lave et sa croûte, figées. */
+.cos-frame[data-frame='lava'] { background-image: url('/cosmetics/frames/lava.svg'); }
+.cos-frame[data-frame='lava']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/frames/lava-crust.svg') center / contain no-repeat;
+}
+@supports (mask-image: none) or (-webkit-mask-image: none) {
+  .cos-frame[data-frame='lava']:not(.cos-custom) {
+    -webkit-mask: url('/cosmetics/frames/lava.svg') center / contain no-repeat;
+    mask: url('/cosmetics/frames/lava.svg') center / contain no-repeat;
+  }
+  .cos-frame[data-frame='lava']::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 200%;
+    background: url('/cosmetics/frames/lava-flow.svg') 0 0 / 100% 50% repeat;
+    animation: cos-lava-flow 14s linear infinite;
+  }
+}
+@keyframes cos-lava-flow {
+  to { transform: translateY(50%); }
+}
+
+/* --- Éclairs (or) : l'arc crépite, des éclairs claquent par à-coups. --------- */
+.cos-frame[data-frame='bolt'] {
+  background-image: url('/cosmetics/frames/bolt.svg');
+  overflow: hidden;
+}
+.cos-frame[data-frame='bolt']::before,
+.cos-frame[data-frame='bolt']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+/* Planche de 3 arcs. */
+.cos-frame[data-frame='bolt']::before {
+  height: 300%;
+  background: url('/cosmetics/frames/bolt-arc.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-bolt-arc 1.2s steps(3) infinite;
+}
+/* Planche de 8 images d'éclairs (certaines vides), tenues plus ou moins longtemps. */
+.cos-frame[data-frame='bolt']::after {
+  height: 800%;
+  background: url('/cosmetics/frames/bolt-sparks.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-bolt-sparks 4.2s steps(1, end) infinite;
+}
+@keyframes cos-bolt-arc {
+  to { transform: translateY(-100%); }
+}
+@keyframes cos-bolt-sparks {
+  0% { transform: translateY(0); }
+  9% { transform: translateY(-12.5%); }
+  15% { transform: translateY(-25%); }
+  40% { transform: translateY(-37.5%); }
+  46% { transform: translateY(-50%); }
+  52% { transform: translateY(-62.5%); }
+  72% { transform: translateY(-75%); }
+  78%, 100% { transform: translateY(-87.5%); }
+}
+
+/* --- Glitch RGB (platine) : franges rouge / cyan qui sautent, blocs de pixels. */
+.cos-frame[data-frame='glitch'] {
+  background-image: url('/cosmetics/frames/glitch.svg');
+  overflow: hidden;
+}
+.cos-frame[data-frame='glitch']::before,
+.cos-frame[data-frame='glitch']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 0;
+}
+.cos-frame[data-frame='glitch']::before {
+  height: 100%;
+  background: url('/cosmetics/frames/glitch-rgb.svg') center / contain no-repeat;
+  animation: cos-glitch-jump 4.6s steps(1, end) infinite;
+}
+/* Planche de 5 images : 0 = calme (figé), 1 à 4 = rafales, calées sur les sauts. */
+.cos-frame[data-frame='glitch']::after {
+  height: 500%;
+  background: url('/cosmetics/frames/glitch-blocks.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-glitch-blocks 4.6s steps(1, end) infinite;
+}
+@keyframes cos-glitch-jump {
+  0%, 70% { transform: none; }
+  72% { transform: translate(-2.4%, 0.8%); }
+  74.5% { transform: translate(2%, -1.2%); }
+  77% { transform: translate(-0.8%, 0); }
+  79%, 88% { transform: none; }
+  90% { transform: translate(2.8%, 0.8%); }
+  92.5% { transform: translate(-1.6%, -0.8%); }
+  95%, 100% { transform: none; }
+}
+@keyframes cos-glitch-blocks {
+  0%, 70% { transform: translateY(0); }
+  72% { transform: translateY(-20%); }
+  74.5% { transform: translateY(-40%); }
+  77% { transform: translateY(-60%); }
+  79%, 88% { transform: translateY(0); }
+  90% { transform: translateY(-80%); }
+  92.5% { transform: translateY(-20%); }
+  95%, 100% { transform: translateY(0); }
+}
+
+/* --- Holographique (platine) : irisé pastel, un reflet passe en diagonale. --- */
+/* Le cadre est découpé par sa propre forme : le reflet ne touche que l'anneau.
+   Figé, le reflet reste posé sur le coin haut gauche. */
+.cos-frame[data-frame='holo'] { background-image: url('/cosmetics/frames/holo.svg'); }
+.cos-frame[data-frame='holo']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/cosmetics/frames/holo-spark.svg') center / contain no-repeat;
+  opacity: 0.85;
+  animation: cos-holo-twinkle 2.8s ease-in-out infinite alternate;
+}
+@supports (mask-image: none) or (-webkit-mask-image: none) {
+  .cos-frame[data-frame='holo']:not(.cos-custom) {
+    -webkit-mask: url('/cosmetics/frames/holo.svg') center / contain no-repeat;
+    mask: url('/cosmetics/frames/holo.svg') center / contain no-repeat;
+  }
+  .cos-frame[data-frame='holo']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('/cosmetics/frames/holo-shine.svg') center / contain no-repeat;
+    transform: translate(-22%, -22%);
+    opacity: 0.6;
+    animation: cos-holo-shine 5.5s ease-in-out infinite;
+  }
+}
+@keyframes cos-holo-shine {
+  0% { transform: translate(-70%, -70%); opacity: 1; }
+  40%, 100% { transform: translate(70%, 70%); opacity: 1; }
+}
+@keyframes cos-holo-twinkle {
+  from { opacity: 0.2; }
+  to { opacity: 1; }
+}
+
+/* --- Arc-en-ciel pixel (divin) : gros pixels qui défilent, étincelles. ------- */
+/* Planche de 16 images (un pixel de décalage par image) et planche de
+   4 images d'étincelles aux coins, déphasées. */
+.cos-frame[data-frame='pixelrainbow'] {
+  background-image: url('/cosmetics/frames/pixelrainbow.svg');
+  overflow: hidden;
+}
+.cos-frame[data-frame='pixelrainbow']::before,
+.cos-frame[data-frame='pixelrainbow']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+.cos-frame[data-frame='pixelrainbow']::before {
+  height: 1600%;
+  background: url('/cosmetics/frames/pixelrainbow-run.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-pixelrainbow-run 2.4s steps(16) infinite;
+}
+.cos-frame[data-frame='pixelrainbow']::after {
+  height: 400%;
+  background: url('/cosmetics/frames/pixelrainbow-spark.svg') 0 0 / 100% 100% no-repeat;
+  animation: cos-pixelrainbow-spark 1.2s steps(4) infinite;
+}
+@keyframes cos-pixelrainbow-run {
+  to { transform: translateY(-100%); }
+}
+@keyframes cos-pixelrainbow-spark {
+  to { transform: translateY(-100%); }
+}

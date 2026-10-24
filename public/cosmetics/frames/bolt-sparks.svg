@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 1040">
+<defs><filter id="b" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="1.1"/></filter>
+<g id="k"><path d="M-1.4-7L3.4-7L.8-1.6L3.8-1.6L-2.6 8L-.6 1.4L-3.4 1.4Z" fill="#00e5ff" filter="url(#b)"/><path d="M-1.4-7L3.4-7L.8-1.6L3.8-1.6L-2.6 8L-.6 1.4L-3.4 1.4Z" fill="#f2ffff" stroke="#00ffff" stroke-width=".7" stroke-linejoin="round"/></g></defs>
+<use href="#k" transform="translate(110 6.5) rotate(-30)"/><use href="#k" transform="translate(6.5 92) rotate(18)"/><use href="#k" transform="translate(74 124.5) rotate(-100)"/><use href="#k" transform="translate(123 228) rotate(-24)"/><use href="#k" transform="translate(21 398) rotate(32)"/><use href="#k" transform="translate(124.5 450) rotate(190)"/><use href="#k" transform="translate(104 644) rotate(36)"/><use href="#k" transform="translate(7 556) rotate(-30)"/><use href="#k" transform="translate(5.5 844) rotate(10)"/><use href="#k" transform="translate(60 785.5) rotate(75)"/>
+</svg>
