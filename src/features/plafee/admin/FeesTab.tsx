@@ -148,9 +148,22 @@ interface ItemForm {
   effect: string;
   active: boolean;
   rarity: string;
+  og: boolean;
 }
 
-const BLANK_ITEM: ItemForm = { id: null, sku: null, name: '', description: '', category: 'nameplate', price: 300, icon_url: null, effect: '', active: true, rarity: '' };
+const BLANK_ITEM: ItemForm = {
+  id: null,
+  sku: null,
+  name: '',
+  description: '',
+  category: 'nameplate',
+  price: 300,
+  icon_url: null,
+  effect: '',
+  active: true,
+  rarity: '',
+  og: false,
+};
 
 /** Les rayons de la photo : leur image remplace le dessin d'origine, et un nom libre crée un objet à toi. */
 const PHOTO_CATEGORIES: ShopCategory[] = ['profile_border', 'avatar_accessory', 'avatar_effect'];
@@ -181,6 +194,7 @@ function ShopItems({ flash }: { flash: FlashFn }) {
       effect: String(i.payload[PAYLOAD_HINTS[i.category].key] ?? (i.payload.custom ? '(texte au choix)' : '')),
       active: i.is_active,
       rarity: i.rarity ?? '',
+      og: Boolean(i.is_og),
     });
 
   const submit = async (e: FormEvent) => {
@@ -197,6 +211,7 @@ function ShopItems({ flash }: { flash: FlashFn }) {
         payload: form.effect.trim() ? { [hint.key]: form.category === 'nameplate' ? form.effect.trim().toUpperCase() : form.effect.trim() } : {},
         active: form.active,
         rarity: form.rarity,
+        is_og: form.og,
       });
       flash('ok', form.id ? 'Objet modifié.' : 'Objet ajouté à la boutique.');
       setForm(BLANK_ITEM);
@@ -286,6 +301,9 @@ function ShopItems({ flash }: { flash: FlashFn }) {
         <label className="adm-check">
           <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} /> En vente
         </label>
+        <label className="adm-check">
+          <input type="checkbox" checked={form.og} onChange={(e) => set('og', e.target.checked)} /> OG (exclu des offres)
+        </label>
         <div className="plf-actions">
           <button type="submit" className="neon-btn" data-variant="solid">
             {form.id ? 'Enregistrer' : 'Créer'}
@@ -320,7 +338,14 @@ function ShopItems({ flash }: { flash: FlashFn }) {
               <tbody>
                 {items.map((i) => (
                   <tr key={i.id} data-inactive={!i.is_active || undefined}>
-                    <td>{i.name}</td>
+                    <td>
+                      {i.name}{' '}
+                      {i.is_og && (
+                        <span className="adm-pill" title="Exclu des offres du jour">
+                          OG
+                        </span>
+                      )}
+                    </td>
                     <td>{SHOP_CATEGORIES.find((c) => c.id === i.category)?.label}</td>
                     <td>{i.rarity ? <span className="plf-chip-mini" data-rarity={i.rarity}>{RARITY_LABELS[i.rarity]}</span> : '—'}</td>
                     <td>{i.is_default ? 'Gratuit' : <FeesAmount value={i.price} size="sm" />}</td>

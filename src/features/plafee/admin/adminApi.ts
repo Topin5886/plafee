@@ -262,6 +262,8 @@ export const upsertShopItem = (i: {
   active: boolean;
   /** '' retire la rareté ; absent, elle ne change pas. */
   rarity?: string;
+  /** OG : exclu des offres du jour. Absent, la case ne change pas. */
+  is_og?: boolean;
 }) =>
   rpc<string>('admin_upsert_shop_item', {
     p_id: i.id,
@@ -273,6 +275,7 @@ export const upsertShopItem = (i: {
     p_payload: i.payload,
     p_active: i.active,
     p_rarity: i.rarity ?? null,
+    p_is_og: i.is_og ?? null,
   });
 
 export interface AdminTransaction {

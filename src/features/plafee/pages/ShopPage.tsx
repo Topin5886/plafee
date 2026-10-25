@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Flame, Lock, Play, ShoppingBag, Sparkles, Store } from 'lucide-react';
+import { Check, Flame, Lock, Play, ShoppingBag, Sparkles, Store, Tag, Timer } from 'lucide-react';
 import { useAuth } from '../../account/useAuth';
 import { SocialNav } from '../../social/components/SocialNav';
 import { Modal } from '../../social/components/Modal';
@@ -8,7 +8,20 @@ import { UserAvatar } from '../../social/components/UserAvatar';
 import { achievementIcon } from '../../achievements/icons';
 import { usePlafee } from '../usePlafee';
 import { invalidateCosmetics } from '../useCosmetics';
-import { buyItem, equipItem, getMyPurchases, getShopItems, RARITIES, RARITY_LABELS, type Purchase, type Rarity, type ShopCategory, type ShopItem } from '../api';
+import {
+  buyItem,
+  equipItem,
+  getMyPurchases,
+  getShopItems,
+  RARITIES,
+  RARITY_LABELS,
+  type DailyDeal,
+  type Purchase,
+  type Rarity,
+  type ShopCategory,
+  type ShopItem,
+} from '../api';
+import { useCountdown, useDailyDeals } from '../useDailyDeals';
 import { FeesAmount } from '../components/bits';
 import { formatFees } from '../format';
 import { celebrate, type VictoryAnim } from '../victory';
@@ -128,6 +141,8 @@ export function ShopPage() {
   const [revealed, setRevealed] = useState<ShopItem | null>(null);
   const [nonce, setNonce] = useState(0);
   const uid = user?.id ?? null;
+  const { deals, error: dealsError, endsAt } = useDailyDeals();
+  const dealById = useMemo(() => new Map((deals ?? []).map((d) => [d.item_id, d])), [deals]);
 
   useEffect(() => {
     let cancelled = false;
@@ -211,6 +226,23 @@ export function ShopPage() {
           )}
         </section>
 
+        <DailyDeals
+          deals={deals}
+          error={dealsError}
+          endsAt={endsAt}
+          items={items}
+          ownedById={ownedById}
+          signedIn={status === 'signed-in'}
+          balance={balance}
+          username={profile?.username ?? 'Toi'}
+          avatar={profile?.avatar ?? null}
+          userId={uid}
+          onBuy={(item) => {
+            setError(null);
+            setBuying(item);
+          }}
+        />
+
         <section className="acc-card acc-card-wide">
           <div className="soc-tabs plf-tabs" role="tablist" aria-label="Rayons de la boutique">
             {TABS.map((t) => (
@@ -272,7 +304,9 @@ export function ShopPage() {
                       const mine = ownedById.get(item.id);
                       const equipped = isEquipped(item);
                       const req = requirementText(item.requirement ?? {});
-                      const affordable = balance >= item.price;
+                      const deal = dealById.get(item.id);
+                      const price = deal?.deal_price ?? item.price;
+                      const affordable = balance >= price;
                       return (
                         <li
                           key={item.id}
@@ -291,7 +325,13 @@ export function ShopPage() {
                             </p>
                           )}
                           <div className="plf-shop-foot">
-                            {item.is_default ? <span className="plf-free">Gratuit</span> : <FeesAmount value={item.price} size="sm" />}
+                            {item.is_default ? (
+                              <span className="plf-free">Gratuit</span>
+                            ) : deal && !mine ? (
+                              <DealPrice deal={deal} />
+                            ) : (
+                              <FeesAmount value={item.price} size="sm" />
+                            )}
                             {item.category === 'victory_animation' && (
                               <button
                                 type="button"
@@ -344,6 +384,7 @@ export function ShopPage() {
       {buying && (
         <BuyDialog
           item={buying}
+          deal={dealById.get(buying.id)}
           balance={balance}
           onClose={() => setBuying(null)}
           onBought={() => {
@@ -358,12 +399,137 @@ export function ShopPage() {
   );
 }
 
-function BuyDialog({ item, balance, onClose, onBought }: { item: ShopItem; balance: number; onClose: () => void; onBought: () => void }) {
+/** L'ancien prix barré, le nouveau, et l'étiquette de remise. */
+function DealPrice({ deal }: { deal: DailyDeal }) {
+  return (
+    <span className="plf-deal-price">
+      <s className="plf-deal-old" aria-label={`Au lieu de ${formatFees(deal.price)} FEES`}>
+        {formatFees(deal.price)}
+      </s>
+      <FeesAmount value={deal.deal_price} size="sm" />
+    </span>
+  );
+}
+
+/** En haut de la boutique : les 3 offres du jour et le temps qui leur reste. */
+function DailyDeals({
+  deals,
+  error,
+  endsAt,
+  items,
+  ownedById,
+  signedIn,
+  balance,
+  username,
+  avatar,
+  userId,
+  onBuy,
+}: {
+  deals: DailyDeal[] | null;
+  error: string | null;
+  endsAt: number | null;
+  items: ShopItem[] | null;
+  ownedById: Map<string, Purchase>;
+  signedIn: boolean;
+  balance: number;
+  username: string;
+  avatar: string | null;
+  userId: string | null;
+  onBuy: (item: ShopItem) => void;
+}) {
+  const left = useCountdown(endsAt);
+  if (deals !== null && deals.length === 0) return null;
+  const pct = deals?.[0]?.discount_pct ?? 15;
+
+  return (
+    <section className="acc-card acc-card-wide plf-deals" aria-labelledby="plf-deals-title">
+      <div className="plf-deals-head">
+        <h2 id="plf-deals-title" className="acc-section-title">
+          <Tag size={17} aria-hidden /> Offres du jour
+        </h2>
+        <p className="plf-deals-timer" aria-live="off">
+          <Timer size={14} aria-hidden /> Nouvelles offres dans <time>{left}</time>
+        </p>
+      </div>
+      <p className="plf-shop-hint">Trois objets à -{pct} % pour tout le monde, jusqu'à minuit (heure de Paris).</p>
+
+      {error && !deals ? (
+        <p className="neon-error" role="alert">
+          {error}
+        </p>
+      ) : !deals ? (
+        <p className="neon-hint" role="status">
+          Chargement…
+        </p>
+      ) : (
+        <ul className="plf-shop-grid plf-deals-grid">
+          {deals.map((d) => {
+            // L'objet complet si la boutique l'a déjà chargé, sinon ce que l'offre en dit.
+            const item: ShopItem = items?.find((i) => i.id === d.item_id) ?? {
+              id: d.item_id,
+              sku: d.sku,
+              name: d.name,
+              description: d.description,
+              category: d.category,
+              price: d.price,
+              icon_url: d.icon_url,
+              payload: d.payload,
+              requirement: {},
+              is_default: false,
+              is_active: true,
+              sort_order: 0,
+              rarity: d.rarity,
+            };
+            const owned = ownedById.has(d.item_id);
+            return (
+              <li key={`${d.day}-${d.item_id}`} className="plf-shop-item plf-deal" data-rarity={d.rarity} data-owned={owned || undefined}>
+                <span className="plf-deal-tag">-{d.discount_pct} %</span>
+                <span className="plf-rarity-tag">{RARITY_LABELS[d.rarity]}</span>
+                <ItemPreview item={item} username={username} avatar={avatar} userId={userId} />
+                <div className="plf-deal-body">
+                  <h3>{d.name}</h3>
+                  <div className="plf-shop-foot">
+                    <DealPrice deal={d} />
+                    {owned ? (
+                      <span className="plf-equipped">
+                        <Check size={14} aria-hidden /> Déjà possédé
+                      </span>
+                    ) : signedIn ? (
+                      <button type="button" className="neon-btn plf-btn-sm" data-variant={balance >= d.deal_price ? 'solid' : undefined} onClick={() => onBuy(item)}>
+                        <ShoppingBag size={14} aria-hidden /> Acheter
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function BuyDialog({
+  item,
+  deal,
+  balance,
+  onClose,
+  onBought,
+}: {
+  item: ShopItem;
+  deal?: DailyDeal;
+  balance: number;
+  onClose: () => void;
+  onBought: () => void;
+}) {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const custom = Boolean(item.payload.custom);
-  const short = balance < item.price;
+  // Le prix affiché ; la base recalcule le sien et refuse s'il est plus haut.
+  const price = deal?.deal_price ?? item.price;
+  const short = balance < price;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -371,7 +537,7 @@ function BuyDialog({ item, balance, onClose, onBought }: { item: ShopItem; balan
     setBusy(true);
     setError(null);
     try {
-      await buyItem(item.id, custom ? text : undefined);
+      await buyItem(item.id, custom ? text : undefined, price);
       onBought();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Achat impossible.');
@@ -383,15 +549,16 @@ function BuyDialog({ item, balance, onClose, onBought }: { item: ShopItem; balan
     <Modal open onClose={onClose} title="Confirmer l'achat">
       <form className="plf-buy" onSubmit={submit}>
         <p>
-          <strong>{item.name}</strong> pour <FeesAmount value={item.price} size="sm" />
+          <strong>{item.name}</strong> pour {deal ? <DealPrice deal={deal} /> : <FeesAmount value={item.price} size="sm" />}
         </p>
+        {deal && <p className="neon-hint">Offre du jour -{deal.discount_pct} %, valable jusqu'à minuit (heure de Paris).</p>}
         {short ? (
           <p className="neon-error" role="alert">
-            Pas assez de FEES ! Tu en as {formatFees(balance)}, il en faut {formatFees(item.price)}.
+            Pas assez de FEES ! Tu en as {formatFees(balance)}, il en faut {formatFees(price)}.
           </p>
         ) : (
           <p className="neon-hint">
-            Solde après l'achat : {formatFees(balance - item.price)} FEES. Un achat est définitif.
+            Solde après l'achat : {formatFees(balance - price)} FEES. Un achat est définitif.
           </p>
         )}
         {custom && !short && (

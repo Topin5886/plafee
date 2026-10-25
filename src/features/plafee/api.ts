@@ -188,6 +188,8 @@ export interface ShopItem {
   sort_order: number;
   /** Absent avant la migration 0010, et pour les objets sans rareté (thèmes, plaques…). */
   rarity?: Rarity | null;
+  /** Objet OG : jamais dans les offres du jour. Absent avant la migration 0011. */
+  is_og?: boolean;
 }
 
 export interface Purchase {
@@ -214,8 +216,41 @@ export async function getMyPurchases(userId: string): Promise<Purchase[]> {
   return (data ?? []) as Purchase[];
 }
 
-export const buyItem = (itemId: string, customText?: string) =>
-  rpc<{ balance: number; item_id: string }>('shop_purchase', { p_item_id: itemId, p_custom_text: customText ?? null });
+/**
+ * `maxPrice` : le prix affiché au joueur. La base calcule le vrai prix (remise
+ * comprise) et refuse l'achat s'il dépasse ce plafond, par exemple quand
+ * l'offre du jour se termine pendant que la fenêtre d'achat est ouverte.
+ */
+export const buyItem = (itemId: string, customText?: string, maxPrice?: number) =>
+  rpc<{ balance: number; item_id: string; price: number; deal: boolean }>('shop_purchase', {
+    p_item_id: itemId,
+    p_custom_text: customText ?? null,
+    p_max_price: maxPrice ?? null,
+  });
+
+/** Une offre du jour : 3 par jour, tirées en base, les mêmes pour tout le monde. */
+export interface DailyDeal {
+  day: string;
+  slot: number;
+  item_id: string;
+  sku: string | null;
+  name: string;
+  description: string | null;
+  category: ShopCategory;
+  rarity: Rarity;
+  icon_url: string | null;
+  payload: Record<string, unknown>;
+  price: number;
+  deal_price: number;
+  discount_pct: number;
+  /** Prochain minuit, heure de Paris. */
+  ends_at: string;
+}
+
+export const getDailyDeals = () =>
+  rpc<DailyDeal[]>('get_daily_deals').then((rows) =>
+    (rows ?? []).map((r) => ({ ...r, price: Number(r.price), deal_price: Number(r.deal_price) })),
+  );
 
 export const equipItem = (itemId: string) => rpc<void>('shop_equip', { p_item_id: itemId });
 
