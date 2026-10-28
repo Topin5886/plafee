@@ -101,27 +101,31 @@ export function Home() {
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transitionEnd: { filter: 'none' } }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <section className="home-hero" aria-labelledby="home-title">
-            <div className="home-marquee">
-              <img src={`${BRAND}plafee-banner.svg`} alt="" className="home-banner" width={1662} height={650} />
-            </div>
-            <div className="home-hero-copy">
-              <h1 id="home-title" className="home-title">
-                <span className="soc-sr-only">PLAFEE : </span>La salle d'arcade entre potes
-              </h1>
-              <Link to={trending.to} className="home-press" aria-label={`Jouer au jeu tendance : ${trending.name}`}>
-                <span className="home-press-key">
-                  <span className="plf-blink" aria-hidden>
-                    ▶
-                  </span>{' '}
-                  Press start
-                </span>
-                <small aria-hidden>Jeu tendance : {trending.name}</small>
-              </Link>
-            </div>
-          </section>
+          {/* Sur grand écran, l'événement en cours se range à droite du
+              fronton, dans la même colonne que la fiche du joueur. */}
+          <div className="home-top">
+            <section className="home-hero" aria-labelledby="home-title">
+              <div className="home-marquee">
+                <img src={`${BRAND}plafee-banner.svg`} alt="" className="home-banner" width={1662} height={650} />
+              </div>
+              <div className="home-hero-copy">
+                <h1 id="home-title" className="home-title">
+                  <span className="soc-sr-only">PLAFEE : </span>La salle d'arcade entre potes
+                </h1>
+                <Link to={trending.to} className="home-press" aria-label={`Jouer au jeu tendance : ${trending.name}`}>
+                  <span className="home-press-key">
+                    <span className="plf-blink" aria-hidden>
+                      ▶
+                    </span>{' '}
+                    Press start
+                  </span>
+                  <small aria-hidden>Jeu tendance : {trending.name}</small>
+                </Link>
+              </div>
+            </section>
 
-          <HomeEvents />
+            <HomeEvents />
+          </div>
 
           <div className="home-main">
             <section className="home-games-wrap" aria-labelledby="home-games-title">

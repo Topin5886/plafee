@@ -613,6 +613,59 @@ a.home-profile:hover {
 
 .home-add-msg[data-ok='false'] { color: var(--danger); }
 
+/* --- Grand écran -------------------------------------------------------------------- */
+
+/* Sur ordinateur, l'accueil prend la largeur de l'en-tête et s'organise en
+   deux colonnes : à gauche le fronton puis les bornes, à droite une colonne
+   fixe qui reçoit l'événement en cours puis la fiche du joueur. */
+@media (min-width: 1180px) {
+  .home .container,
+  :root:has(.home) .site-footer .container { max-width: 1440px; }
+
+  .home {
+    --home-rail: clamp(320px, 24vw, 380px);
+  }
+
+  .home-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(20px, 2.5vw, 32px);
+    align-items: stretch;
+  }
+
+  .home-top:has(.plf-home-events) { grid-template-columns: minmax(0, 1fr) var(--home-rail); }
+
+  /* L'événement prend toute la hauteur du fronton : pas de trou dessous. */
+  .home-top .plf-home-events {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .home-top .plf-home-event-link { display: block; height: 100%; }
+  .home-top .plf-event-card { justify-content: space-between; }
+
+  .home-marquee { height: clamp(200px, 17vw, 260px); }
+
+  .home-main { grid-template-columns: minmax(0, 1fr) var(--home-rail); }
+
+  /* Sept bornes (six jeux et la borne bonus) : le jeu tendance prend toute
+     la première rangée, puis deux rangées de trois. */
+  .home-games { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .home-tile[data-hot] { grid-column: 1 / -1; }
+}
+
+/* Plus large : quatre colonnes, le jeu tendance sur deux, soit deux rangées
+   pleines. */
+@media (min-width: 1280px) {
+  .home-games { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .home-tile[data-hot] { grid-column: span 2; }
+}
+
+/* Sous le grand écran, le fronton et l'événement restent l'un sous l'autre. */
+@media (max-width: 1179.98px) {
+  .home-top { display: contents; }
+}
+
 /* --- Tablettes et téléphones ---------------------------------------------------------- */
 
 @media (max-width: 1080px) {
