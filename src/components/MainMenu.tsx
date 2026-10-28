@@ -54,7 +54,7 @@ export function MainMenu() {
         { to: '/', label: 'Accueil', icon: House },
         { to: '/sessions', label: 'Sessions', icon: Radio, account: true },
         { to: '/evenements', label: 'Événements', icon: PartyPopper },
-        { to: '/nouveautes', label: 'Nouveautés', icon: Sparkles },
+        { to: '/nouveautes', label: 'Patch notes', icon: Sparkles },
       ],
     },
     {
