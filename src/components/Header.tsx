@@ -86,7 +86,6 @@ export function Header() {
   return (
     <header className="site-header" ref={header}>
       <div className="container site-header-inner">
-        <MainMenu />
         <Link to="/" className="site-brand" aria-label="PLAFEE, accueil">
           <img src={`${BRAND}plafee-mark.svg`} alt="" className="site-brand-mark" width={23} height={40} />
           <img src={`${BRAND}plafee-wordmark.svg`} alt="" className="site-brand-word" width={116} height={20} />
@@ -113,6 +112,7 @@ export function Header() {
             <NotificationBell />
             <AccountMenu />
             <ThemeToggle />
+            <MainMenu />
           </div>
         </div>
       </div>

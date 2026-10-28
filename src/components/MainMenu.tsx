@@ -7,8 +7,8 @@ import { useSocial } from '../features/social/useSocial';
 import { usePlafee } from '../features/plafee/usePlafee';
 
 /**
- * Le menu principal : le bouton « trois traits » à gauche du logo, et le
- * tiroir qui glisse depuis le bord de l'écran.
+ * Le menu principal : le bouton « trois traits » au bout de l'en-tête, à
+ * droite, et le tiroir qui glisse depuis le bord droit de l'écran.
  *
  * L'en-tête ne garde que l'essentiel (Accueil, Classements, Boutique) ; tout
  * le reste du site se range ici. Le compte (profil, trophées, photo,

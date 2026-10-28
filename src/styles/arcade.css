@@ -636,7 +636,7 @@ html[data-fx='calm'] :is(.scopa-lobby-card, .p4-lobby-card, .sess-panel, .f7-set
 
 /* --- Menu principal (MainMenu.tsx) ---------------------------------------------- */
 
-/* Le bouton « trois traits », à gauche du logo, à la taille des commandes. */
+/* Le bouton « trois traits », au bout de l'en-tête à droite, à la taille des commandes. */
 .main-menu-btn {
   position: relative;
   display: grid;
@@ -693,10 +693,10 @@ html[data-fx='calm'] :is(.scopa-lobby-card, .p4-lobby-card, .sess-panel, .f7-set
   animation: main-menu-blink 1.2s steps(2) infinite;
 }
 
-/* Le tiroir : toute la hauteur, depuis la gauche. */
+/* Le tiroir : toute la hauteur, depuis la droite. */
 .main-menu {
   position: fixed;
-  inset: 0 auto 0 0;
+  inset: 0 0 0 auto;
   display: none;
   flex-direction: column;
   width: min(320px, 86vw);
@@ -706,13 +706,13 @@ html[data-fx='calm'] :is(.scopa-lobby-card, .p4-lobby-card, .sess-panel, .f7-set
   padding: calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 14px);
   overflow-y: auto;
   border: none;
-  border-right: 2px solid var(--neon);
+  border-left: 2px solid var(--neon);
   border-radius: 0;
   color: var(--ink);
   background:
     repeating-linear-gradient(0deg, rgb(var(--neon-rgb) / 0.035) 0 1px, transparent 1px 4px),
     var(--panel);
-  box-shadow: 0 0 22px rgb(var(--neon-rgb) / 0.45), 30px 0 80px rgb(0 0 0 / 0.6);
+  box-shadow: 0 0 22px rgb(var(--neon-rgb) / 0.45), -30px 0 80px rgb(0 0 0 / 0.6);
 }
 
 .main-menu:popover-open {
@@ -882,12 +882,12 @@ html[data-fx='calm'] :is(.scopa-lobby-card, .p4-lobby-card, .sess-panel, .f7-set
 .site-header[data-fit='tiny'] .main-menu-bars { width: 16px; }
 
 @keyframes main-menu-in {
-  from { transform: translateX(-100%); opacity: 0.4; }
+  from { transform: translateX(100%); opacity: 0.4; }
   to { transform: none; opacity: 1; }
 }
 
 @keyframes main-menu-item-in {
-  from { transform: translateX(-14px); opacity: 0; }
+  from { transform: translateX(14px); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
 
