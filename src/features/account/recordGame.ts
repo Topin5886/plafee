@@ -33,6 +33,17 @@ export interface GameOutcome {
   signature: string;
   /** Compteurs propres au jeu, pour les trophées (scopas, cartes spéciales…). */
   details?: Record<string, number>;
+  /**
+   * Les comptes gagnants, tels que ce joueur les voit — lui compris s'il a
+   * gagné. C'est ce qui permet aux perdants de confirmer une victoire : la
+   * base ne paie un gagnant que si un adversaire le nomme aussi. Les invités
+   * et les bots n'ont pas de compte, ils n'y figurent pas.
+   */
+  winners: string[];
+  /** Roulette de Vérité : le compte du chef, quand la partie a été menée au bout. */
+  chef?: string | null;
+  /** Une table locale contre des bots : personne ne peut la confirmer. */
+  vsBots: boolean;
 }
 
 /**
@@ -66,7 +77,8 @@ export function sessionKeyFor(outcome: GameOutcome): string {
  * Enregistre le résultat du joueur courant.
  *
  * Les points ne sont pas transmis : ils sont calculés en base, où un client
- * modifié ne peut pas les atteindre.
+ * modifié ne peut pas les atteindre. Une victoire n'y est acquise qu'une fois
+ * confirmée par un adversaire (migration 0014) : d'où `status`.
  */
 export async function recordGame(outcome: GameOutcome): Promise<RecordedGame> {
   const { data, error } = await (await getSupabase())
@@ -79,6 +91,9 @@ export async function recordGame(outcome: GameOutcome): Promise<RecordedGame> {
       p_score: Math.trunc(outcome.score) || 0,
       p_duration_seconds: outcome.durationSeconds ? Math.trunc(outcome.durationSeconds) : null,
       p_details: outcome.details ?? {},
+      p_winners: outcome.winners,
+      p_chef: outcome.chef ?? null,
+      p_vs_bots: outcome.vsBots,
     })
     .single<RecordedGame>();
 

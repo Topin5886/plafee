@@ -88,6 +88,25 @@ export const getReports = (status: string | null) => rpc<AdminReport[]>('admin_l
 export const resolveReport = (id: number, status: string, resolution: string) =>
   rpc<void>('admin_resolve_report', { p_id: id, p_status: status, p_resolution: resolution || null });
 
+/** Une victoire (ou une Roulette menée en chef) démentie par un adversaire (0014). */
+export interface AdminDispute {
+  result_id: string;
+  created_at: string;
+  game_type: string;
+  game_label: string;
+  room_code: string | null;
+  claim: 'win' | 'chef';
+  status: 'pending' | 'contested' | 'confirmed' | 'rejected';
+  claimant_id: string;
+  claimant: string | null;
+  /** Les autres comptes de la partie : d'accord ou non, et leurs démentis passés. */
+  reporters: { user_id: string; username: string | null; agrees: boolean; disputes: number }[];
+}
+
+export const getDisputes = (status: string | null) => rpc<AdminDispute[]>('admin_list_disputes', { p_status: status });
+export const resolveDispute = (resultId: string, accept: boolean, reason: string) =>
+  rpc<void>('admin_resolve_dispute', { p_result: resultId, p_accept: accept, p_reason: reason || null });
+
 export interface FlaggedQuestion {
   id: string;
   content: string;

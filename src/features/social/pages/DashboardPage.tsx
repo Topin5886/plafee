@@ -10,7 +10,7 @@ import { ActiveSessions } from '../components/ActiveSessions';
 import { useSocial } from '../useSocial';
 import { useGroups } from '../useGroups';
 import { useLeaderboard } from '../useLeaderboard';
-import { timeAgo } from '../format';
+import { outcomeLabel, timeAgo } from '../format';
 
 /** L'ancien tableau de bord vit désormais sur l'accueil, sous la maquette. */
 export function DashboardPage() {
@@ -156,7 +156,7 @@ function Dashboard({ withFriends }: { withFriends: boolean }) {
                 <div className="soc-row-main">
                   <GameTitle game={g.game_type} size="sm" className="gt-start" />
                   <span className="soc-meta">
-                    {g.won ? 'Victoire' : 'Défaite'} · {g.player_count} joueurs · {timeAgo(g.created_at)}
+                    {outcomeLabel(g)} · {g.player_count} joueurs · {timeAgo(g.created_at)}
                   </span>
                 </div>
                 <span className="soc-row-side soc-lb-points">{g.points > 0 ? `+${g.points}` : '—'}</span>

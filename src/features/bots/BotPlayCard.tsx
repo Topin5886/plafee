@@ -18,7 +18,8 @@ function savedLevel(): BotChoice {
 /**
  * « Contre les bots », dans le salon de chaque jeu : combien d'adversaires
  * (sauf quand le jeu le fixe déjà, par son mode), et quel niveau. La partie
- * compte comme une autre : stats, FEES et trophées.
+ * entre dans les stats, mais sans points, FEES ni victoire comptée : jouée
+ * dans un seul navigateur, personne ne peut la confirmer (migration 0014).
  */
 export function BotPlayCard({
   className,
@@ -54,7 +55,7 @@ export function BotPlayCard({
       <h2>
         <Bot size={20} aria-hidden /> Contre les bots
       </h2>
-      <p>Une partie tout de suite, sans attendre personne. Elle compte comme les autres : stats, FEES et trophées.</p>
+      <p>Une partie tout de suite, sans attendre personne. Pour t'entraîner : elle entre dans tes parties, sans points ni FEES.</p>
 
       {fixedCount === undefined && counts && counts.length > 1 ? (
         <div className="bot-row" role="radiogroup" aria-label="Nombre de bots">

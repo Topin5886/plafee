@@ -146,6 +146,7 @@ export function PlafeeProvider({ children }: { children: ReactNode }) {
   useNotificationEvents((event) => {
     switch (event.kind) {
       case 'fees':
+      case 'victory_confirmed':
         refreshWallet();
         break;
       case 'badge':

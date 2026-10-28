@@ -60,6 +60,13 @@ export interface RecordedGame {
   daily_streak?: number;
   /** Événements complétés par cette partie. */
   events_done?: { event_id: string; name: string }[];
+  /**
+   * Où en est ce que la partie réclame (0014) : `confirmed` (rien à confirmer,
+   * ou confirmé), `pending` (un adversaire doit encore nommer le même
+   * gagnant), `contested` (démentie : l'admin tranche), `bots` (partie contre
+   * des bots, sans enjeu).
+   */
+  status?: 'confirmed' | 'pending' | 'contested' | 'rejected' | 'bots';
 }
 
 export const DEFAULT_PREFERENCES: ProfilePreferences = {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Check, Coins, Flame, Loader2, Trophy } from 'lucide-react';
+import { AlertTriangle, Bot, Check, Coins, Flame, Hourglass, Loader2, Trophy } from 'lucide-react';
 import type { RecordState } from '../useRecordGame';
 
 /**
@@ -33,6 +33,32 @@ export function GameRecordBadge({ state }: { state: RecordState }) {
     return (
       <p className="game-record" data-tone="warn" role="status">
         <AlertTriangle size={14} aria-hidden /> Partie non enregistrée ({state.message})
+      </p>
+    );
+  }
+
+  // Une victoire n'est acquise qu'une fois qu'un adversaire a nommé le même
+  // gagnant : la ligne le dit plutôt que d'afficher « +0 points ».
+  if (state.status === 'pending') {
+    return (
+      <p className="game-record" data-tone="muted" role="status">
+        <Hourglass size={14} aria-hidden /> Victoire en attente : un adversaire connecté doit la confirmer.
+      </p>
+    );
+  }
+
+  if (state.status === 'contested') {
+    return (
+      <p className="game-record" data-tone="warn" role="status">
+        <AlertTriangle size={14} aria-hidden /> Victoire contestée : un admin va trancher.
+      </p>
+    );
+  }
+
+  if (state.status === 'bots') {
+    return (
+      <p className="game-record" data-tone="muted" role="status">
+        <Bot size={14} aria-hidden /> Partie contre des bots : comptée dans tes parties, sans points ni FEES.
       </p>
     );
   }

@@ -90,7 +90,10 @@ export type NotificationKind =
   | 'warning'
   | 'ban'
   | 'unban'
-  | 'stats_reset';
+  | 'stats_reset'
+  | 'victory_confirmed'
+  | 'victory_contested'
+  | 'victory_rejected';
 
 export interface AppNotification {
   id: number;
@@ -121,6 +124,11 @@ export interface AppNotification {
     reason?: string;
     /** Note jointe à un badge décerné par un admin. */
     note?: string | null;
+    /** Victoire confirmée, contestée ou refusée (0014) : la partie, et ce qu'elle réclamait. */
+    session_id?: string;
+    claim?: 'win' | 'chef' | null;
+    paid?: boolean;
+    points?: number;
   };
   created_at: string;
   read_at: string | null;

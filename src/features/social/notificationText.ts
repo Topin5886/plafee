@@ -58,6 +58,27 @@ export function describeNotification(
       return { text: `Ton compte est suspendu. Motif : ${n.payload.reason ?? 'non précisé'}.`, to: '/cgu#8-sanctions' };
     case 'unban':
       return { text: 'Ton compte n’est plus suspendu. Bon retour à la table !', to: null };
+    case 'victory_confirmed': {
+      const label = n.payload.game_type ? GAME_LABELS[n.payload.game_type] : 'ta partie';
+      const what = n.payload.claim === 'chef' ? `Ta Roulette menée en chef` : `Ta victoire à ${label}`;
+      return {
+        text: n.payload.paid === false
+          ? `${what} est confirmée (plafond du jour atteint : sans points ni FEES).`
+          : `${what} est confirmée.`,
+        to: '/compte',
+      };
+    }
+    case 'victory_contested': {
+      const label = n.payload.game_type ? GAME_LABELS[n.payload.game_type] : 'ta partie';
+      return { text: `Ta victoire à ${label} est contestée par un adversaire : un admin va trancher.`, to: null };
+    }
+    case 'victory_rejected': {
+      const label = n.payload.game_type ? GAME_LABELS[n.payload.game_type] : 'ta partie';
+      return {
+        text: `Ta victoire à ${label} n'a pas été retenue${n.payload.reason ? ` : ${n.payload.reason}` : ''}.`,
+        to: null,
+      };
+    }
     case 'stats_reset':
       return { text: `Tes statistiques ont été remises à zéro. Motif : ${n.payload.reason ?? 'non précisé'}.`, to: '/cgu#8-sanctions' };
     default:

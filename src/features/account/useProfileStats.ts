@@ -6,6 +6,9 @@ export interface RecentGame {
   id: string;
   game_type: GameTypeId;
   won: boolean;
+  /** Ce que la ligne réclamait, et où elle en est (0014). */
+  claim: 'win' | 'chef' | null;
+  status: string;
   score: number;
   points: number;
   streak_bonus: boolean;
@@ -27,6 +30,9 @@ interface ResultRow {
   id: string;
   game_type: GameTypeId;
   won: boolean;
+  /** Ce que la ligne réclamait, et où elle en est (0014). */
+  claim: 'win' | 'chef' | null;
+  status: string;
   score: number;
   points: number;
   streak_bonus: boolean;
@@ -68,7 +74,7 @@ export function useProfileStats(userId: string | null): State {
           client
             .from('game_results')
             .select(
-              'id, game_type, won, score, points, streak_bonus, created_at, game_sessions(room_code, player_count)',
+              'id, game_type, won, claim, status, score, points, streak_bonus, created_at, game_sessions(room_code, player_count)',
             )
             .eq('user_id', userId)
             // Les parties ajoutées par un admin (God mode) comptent dans les
@@ -91,6 +97,8 @@ export function useProfileStats(userId: string | null): State {
             id: row.id,
             game_type: row.game_type,
             won: row.won,
+            claim: row.claim,
+            status: row.status,
             score: row.score,
             points: row.points,
             streak_bonus: row.streak_bonus,

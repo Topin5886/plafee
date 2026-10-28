@@ -3,6 +3,7 @@ import type { UnoState } from '../uno/engine/types';
 import type { P4State } from '../puissance4/engine/types';
 import type { PublicState as Flip7State } from '../flip7/engine/types';
 import type { VeriteState } from '../verite/engine/types';
+import { isBotId } from '../bots/bots';
 import type { GameOutcome } from './recordGame';
 
 /*
@@ -19,10 +20,20 @@ import type { GameOutcome } from './recordGame';
  *      serait avalée par l'idempotence de la première. `log` et `lastEvent.seq`
  *      survivent au redémarrage dans UNO comme dans Puissance 4 : ils font
  *      d'excellents compteurs de manche.
+ *   4. Nommer les comptes gagnants (`winners`), pour que les perdants
+ *      confirment la victoire en base, et signaler une table de bots.
  *
  * Les dépendances sont uniquement de type, donc effacées à la compilation : ce
- * module ne fait entrer aucun code de jeu dans le bundle des pages de compte.
+ * module ne fait entrer aucun code de jeu dans le bundle des pages de compte
+ * (hormis `isBotId`, une ligne).
  */
+
+const withBots = (players: { id: string }[]) => players.some((p) => isBotId(p.id));
+
+/** Les comptes d'une liste de joueurs, sans les invités ni les bots. */
+function accountsOf(players: { userId?: string | null }[]): string[] {
+  return [...new Set(players.map((p) => p.userId).filter((id): id is string => Boolean(id)))];
+}
 
 /** Une égalité ne fait pas de vainqueur — personne ne marque, la partie compte. */
 export function scopaOutcome(
@@ -37,14 +48,17 @@ export function scopaOutcome(
 
   const best = Math.max(...state.matchScores);
   const tied = state.matchScores.filter((s) => s === best).length > 1;
+  const winner = tied ? -1 : state.matchScores.indexOf(best);
 
   return {
     gameType: 'scopa',
     roomCode,
     playerCount: state.players.length,
-    won: !tied && state.matchScores[me] === best,
+    won: winner === me,
     score: state.matchScores[me] ?? 0,
     signature: `${state.handNumber}|${state.matchScores.join('-')}`,
+    winners: winner === -1 ? [] : accountsOf([state.players[winner]]),
+    vsBots: withBots(state.players),
   };
 }
 
@@ -66,6 +80,8 @@ export function unoOutcome(
     // UNO ne tient pas de score chiffré : seule l'issue compte.
     score: 0,
     signature: `${state.winner}|${state.lastEvent.seq}|${state.log.length}`,
+    winners: accountsOf([state.players[state.winner]].filter(Boolean)),
+    vsBots: withBots(state.players),
   };
 }
 
@@ -90,6 +106,8 @@ export function p4Outcome(
     won: winningTeam !== null && state.players[me].team === winningTeam,
     score: 0,
     signature: `${state.phase}|${winningTeam ?? 'nul'}|${state.winner?.cells.join('-') ?? ''}|${state.log.length}`,
+    winners: winningTeam === null ? [] : accountsOf(state.players.filter((p) => p.team === winningTeam)),
+    vsBots: withBots(state.players),
   };
 }
 
@@ -142,6 +160,8 @@ export function veriteOutcome(state: VeriteState | null, selfId: string | null, 
   const scores = state.players.filter((p) => p.id !== state.chefId).map((p) => p.score);
   const best = Math.max(0, ...scores);
   const unique = scores.filter((s) => s === best).length === 1;
+  const winner = best > 0 && unique ? state.players.find((p) => p.id !== state.chefId && p.score === best) : undefined;
+  const chef = state.completed ? state.players.find((p) => p.id === state.chefId) : undefined;
   return {
     gameType: 'verite',
     roomCode,
@@ -150,6 +170,10 @@ export function veriteOutcome(state: VeriteState | null, selfId: string | null, 
     score: isChef ? 0 : me.score,
     signature: `${state.gameNo}|${state.history.length}|${scores.join('-')}`,
     details: isChef ? { chef_complete: state.completed ? 1 : 0 } : veriteStats(state, selfId),
+    winners: winner ? accountsOf([winner]) : [],
+    chef: chef?.userId ?? null,
+    // La Roulette ne se joue pas contre des bots.
+    vsBots: false,
   };
 }
 
@@ -173,5 +197,7 @@ export function flip7Outcome(state: Flip7State | null, selfId: string | null): G
     score: state.players[me].total,
     // `id` identifie déjà la partie de façon unique, revanche comprise.
     signature: state.id,
+    winners: accountsOf(state.players.filter((p) => p.id === state.winnerId)),
+    vsBots: state.options.mode === 'bots' || state.players.some((p) => p.bot),
   };
 }

@@ -18,6 +18,7 @@ import { RankStrip } from '../social/components/RankStrip';
 import { PlayerFlair } from '../plafee/components/bits';
 import { BadgesPanel, WalletPanel } from '../plafee/components/panels';
 import { DeleteAccountSection } from './components/DeleteAccountSection';
+import { outcomeLabel } from '../social/format';
 
 const DATE_FMT = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 const SHORT_FMT = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -278,7 +279,7 @@ export function ProfilePage() {
                       <td>{GAME_LABELS[game.game_type] ?? game.game_type}</td>
                       <td>
                         <span className="acc-outcome" data-won={game.won}>
-                          {game.won ? 'Victoire' : 'Défaite'}
+                          {outcomeLabel(game)}
                         </span>
                       </td>
                       <td className="acc-col-opt">{game.score || '—'}</td>

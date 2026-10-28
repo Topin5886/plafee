@@ -3,7 +3,7 @@ import { Flame, History } from 'lucide-react';
 import { NeonButton } from '../../account/components/NeonButton';
 import { GAME_LABELS } from '../../account/types';
 import { getGameHistory, type HistoryRow } from '../api';
-import { timeAgo } from '../format';
+import { outcomeLabel, timeAgo } from '../format';
 
 function duration(seconds: number | null): string {
   if (!seconds) return '—';
@@ -66,7 +66,7 @@ export function GameHistory({ userId }: { userId: string }) {
                   <td>{GAME_LABELS[g.game_type] ?? g.game_type}</td>
                   <td>
                     <span className="acc-outcome" data-won={g.won}>
-                      {g.won ? 'Victoire' : 'Défaite'}
+                      {outcomeLabel(g)}
                     </span>
                   </td>
                   <td className="acc-col-opt">{g.player_count}</td>

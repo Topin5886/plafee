@@ -284,12 +284,12 @@ function voidRound(state: VeriteState): VeriteState {
 
 const fail = (state: VeriteState, error: string): ActionResult => ({ state, error });
 
-function join(state: VeriteState, playerId: string, rawName: string): ActionResult {
+function join(state: VeriteState, playerId: string, rawName: string, userId: string | null): ActionResult {
   const name = cleanText(rawName, NAME_MAX) || 'Joueur';
   const existing = findPlayer(state, playerId);
   if (existing) {
     return {
-      state: { ...state, players: state.players.map((p) => (p.id === playerId ? { ...p, name, connected: true } : p)) },
+      state: { ...state, players: state.players.map((p) => (p.id === playerId ? { ...p, name, userId, connected: true } : p)) },
     };
   }
 
@@ -301,7 +301,7 @@ function join(state: VeriteState, playerId: string, rawName: string): ActionResu
       state: {
         ...state,
         chefId: state.chefId && swap(state.chefId),
-        players: state.players.map((p) => (p.id === back.id ? { ...p, id: playerId, connected: true } : p)),
+        players: state.players.map((p) => (p.id === back.id ? { ...p, id: playerId, userId, connected: true } : p)),
         round: state.round && { ...state.round, targetId: swap(state.round.targetId), ring: state.round.ring.map(swap) },
       },
     };
@@ -316,7 +316,7 @@ function join(state: VeriteState, playerId: string, rawName: string): ActionResu
   const eligible = eligiblePlayers(state);
   const turns = state.phase === 'lobby' || !eligible.length ? 0 : Math.min(...eligible.map((p) => p.turns));
   return {
-    state: { ...state, players: [...state.players, { id: playerId, name, connected: true, score: 0, turns }] },
+    state: { ...state, players: [...state.players, { id: playerId, name, userId, connected: true, score: 0, turns }] },
   };
 }
 
@@ -424,7 +424,7 @@ function start(state: VeriteState, actorId: string, publicPool: VeriteQuestion[]
 export function applyAction(state: VeriteState, action: VeriteAction): ActionResult {
   switch (action.type) {
     case 'JOIN':
-      return join(state, action.playerId, action.name);
+      return join(state, action.playerId, action.name, action.userId ?? null);
 
     case 'LEAVE':
       return leave(state, action.playerId);

@@ -1,3 +1,17 @@
+/**
+ * L'issue d'une ligne d'historique. Depuis 0014, une victoire déclarée n'est
+ * une « Victoire » qu'une fois confirmée par un adversaire : avant, ce n'est
+ * pas pour autant une défaite.
+ */
+export function outcomeLabel(g: { won: boolean; claim?: string | null; status?: string | null }): string {
+  if (g.won) return 'Victoire';
+  if (g.status === 'bots') return g.claim === 'win' ? 'Victoire (bots)' : 'Défaite (bots)';
+  if (g.claim === 'win' && g.status === 'pending') return 'En attente';
+  if (g.claim === 'win' && g.status === 'contested') return 'Contestée';
+  if (g.claim === 'win' && g.status === 'rejected') return 'Refusée';
+  return 'Défaite';
+}
+
 const RELATIVE = new Intl.RelativeTimeFormat('fr', { numeric: 'auto' });
 const DAY_FMT = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' });
 const TIME_FMT = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });

@@ -25,6 +25,8 @@ export interface VeritePlayer {
   id: string;
   name: string;
   connected: boolean;
+  /** Le compte du joueur (absent : invité) : il sert à confirmer la partie en base. */
+  userId?: string | null;
   /** Réponses validées par le chef. */
   score: number;
   /** Nombre de fois où la bouteille l'a désigné : sert à répartir les tours. */
@@ -103,7 +105,7 @@ export interface VeriteState {
 }
 
 export type VeriteAction =
-  | { type: 'JOIN'; playerId: string; name: string }
+  | { type: 'JOIN'; playerId: string; name: string; userId?: string | null }
   | { type: 'LEAVE'; playerId: string }
   | { type: 'SET_OPTIONS'; playerId: string; theme: VeriteTheme; rounds: number }
   | { type: 'SET_CHEF'; playerId: string; chefId: string }

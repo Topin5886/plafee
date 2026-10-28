@@ -144,6 +144,7 @@ export function useScopaRoom(roomCode: string, playerName: string, isHost: boole
           type: 'JOIN',
           playerId: id,
           name: nameRef.current,
+          userId: getCurrentUserId(),
         }).state;
         hostStateRef.current = initial;
         setState(maskState(initial, id));

@@ -3,6 +3,7 @@ import Peer, { type DataConnection } from 'peerjs';
 import { applyAction, createInitialState, maskState, playableThemes, revealDuration, SPIN_MS } from '../engine/rules';
 import type { VeriteAction, VeriteState, VeriteTheme } from '../engine/types';
 import { fetchPublicQuestions, isQuestionUuid, markQuestionUsed, publicQuestionUuid } from '../api';
+import { getCurrentUserId } from '../../account/currentUser';
 
 const PEER_PREFIX = 'la-cafeteria-verite-';
 
@@ -156,7 +157,7 @@ export function useVeriteRoom(roomCode: string, playerName: string, isHost: bool
         setSelfId(id);
         const opts = setupRef.current;
         let initial = createInitialState(code, id, crypto.getRandomValues(new Uint32Array(1))[0]);
-        initial = applyAction(initial, { type: 'JOIN', playerId: id, name: nameRef.current }).state;
+        initial = applyAction(initial, { type: 'JOIN', playerId: id, name: nameRef.current, userId: getCurrentUserId() }).state;
         if (opts) {
           initial = applyAction(initial, { type: 'SET_OPTIONS', playerId: id, theme: opts.theme, rounds: opts.rounds }).state;
           if (opts.hostIsChef) initial = applyAction(initial, { type: 'SET_CHEF', playerId: id, chefId: id }).state;
@@ -219,7 +220,7 @@ export function useVeriteRoom(roomCode: string, playerName: string, isHost: bool
         let customsSent = false;
 
         conn.on('open', () => {
-          conn.send({ type: 'ACTION', action: { type: 'JOIN', playerId: id, name: nameRef.current } } satisfies WireMessage);
+          conn.send({ type: 'ACTION', action: { type: 'JOIN', playerId: id, name: nameRef.current, userId: getCurrentUserId() } } satisfies WireMessage);
           setStatus('connected');
         });
         conn.on('data', (data) => {

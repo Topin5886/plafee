@@ -4,6 +4,7 @@ import { Check, RotateCcw, X } from 'lucide-react';
 import { getReports, resolveReport, type AdminReport } from './adminApi';
 import { Flash } from './ui';
 import { fmtDateTime, useFlash } from './helpers';
+import { DisputesPanel } from './DisputesPanel';
 
 const FILTERS = [
   { id: 'pending', label: 'En attente' },
@@ -54,6 +55,8 @@ export function ReportsTab() {
   };
 
   return (
+    <>
+    <DisputesPanel />
     <section className="acc-card acc-card-wide">
       <div className="adm-row-between">
         <h2 className="acc-section-title">Signalements reçus</h2>
@@ -147,5 +150,6 @@ export function ReportsTab() {
         </div>
       )}
     </section>
+    </>
   );
 }

@@ -3,6 +3,8 @@ import { accountsEnabled } from '../../lib/supabase';
 import { useAuth } from './useAuth';
 import { recordGame, sessionKeyFor, type GameOutcome } from './recordGame';
 import { celebrate } from '../plafee/victory';
+import type { RecordedGame } from './types';
+import { useNotificationEvents } from '../social/useSocial';
 
 export type RecordState =
   /** Partie en cours, ou rien à enregistrer. */
@@ -10,7 +12,18 @@ export type RecordState =
   /** Personne n'est connecté : la partie ne compte pour aucun classement. */
   | { kind: 'anonymous' }
   | { kind: 'saving' }
-  | { kind: 'saved'; points: number; streak: number; streakBonus: boolean; already: boolean; fees: number; dailyStreak: number }
+  | {
+      kind: 'saved';
+      points: number;
+      streak: number;
+      streakBonus: boolean;
+      already: boolean;
+      fees: number;
+      dailyStreak: number;
+      /** Une victoire attend la confirmation d'un adversaire, ou l'admin. */
+      status: NonNullable<RecordedGame['status']>;
+      sessionId: string;
+    }
   | { kind: 'error'; message: string };
 
 /**
@@ -77,6 +90,8 @@ export function useRecordGame(outcome: GameOutcome | null): RecordState {
           already: res.already,
           fees: Number(res.fees ?? 0),
           dailyStreak: res.daily_streak ?? 0,
+          status: res.status ?? 'confirmed',
+          sessionId: res.session_id,
         });
         if (!res.already) {
           const fees = Number(res.fees ?? 0);
@@ -104,6 +119,24 @@ export function useRecordGame(outcome: GameOutcome | null): RecordState {
     // tant que la partie ne change pas, et c'est elle qui doit piloter l'effet.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, status]);
+
+  // La confirmation arrive souvent après : c'est le perdant, en enregistrant
+  // sa partie, qui règle celle du gagnant. La base le notifie, et l'écran de
+  // fin passe de « en attente » au bilan.
+  useNotificationEvents((event) => {
+    if (event.kind !== 'victory_confirmed' && event.kind !== 'victory_contested') return;
+    setState((current) => {
+      if (current.kind !== 'saved' || current.sessionId !== event.payload.session_id) return current;
+      if (event.kind === 'victory_contested') return { ...current, status: 'contested' };
+      return {
+        ...current,
+        status: 'confirmed',
+        points: Number(event.payload.points ?? 0),
+        fees: Number(event.payload.fees ?? 0),
+        streakBonus: false,
+      };
+    });
+  });
 
   return state;
 }

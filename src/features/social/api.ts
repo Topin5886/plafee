@@ -253,6 +253,9 @@ export interface HistoryRow {
   id: string;
   game_type: GameTypeId;
   won: boolean;
+  /** Ce que la ligne réclamait, et où elle en est (0014). */
+  claim: 'win' | 'chef' | null;
+  status: string;
   score: number;
   points: number;
   streak_bonus: boolean;
@@ -268,7 +271,7 @@ interface RawHistoryRow extends Omit<HistoryRow, 'player_count' | 'duration_seco
 export async function getGameHistory(userId: string, offset: number, limit = 20) {
   const { data, error, count } = await (await getSupabase())
     .from('game_results')
-    .select('id, game_type, won, score, points, streak_bonus, created_at, game_sessions(player_count, duration_seconds)', {
+    .select('id, game_type, won, claim, status, score, points, streak_bonus, created_at, game_sessions(player_count, duration_seconds)', {
       count: 'exact',
     })
     .eq('user_id', userId)

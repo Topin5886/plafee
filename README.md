@@ -1,7 +1,7 @@
 # PLAFEE 🟩
 
 La salle d'arcade entre potes : plusieurs jeux, un seul endroit, et une borne
-néon pour tout le monde, sur https://julesvalet.github.io/plafee/. (Le site
+néon pour tout le monde, sur https://topin5886.github.io/plafee/. (Le site
 s'appelait « La Cafétéria » jusqu'à la refonte arcade, et vivait sous
 `/la-cafeteria/` ; les clés de stockage, elles, n'ont pas changé : les réglages
 déjà en place suivent.)
@@ -165,17 +165,31 @@ déjà à jour.
 
 Il n'y a pas de serveur pour arbitrer : chaque joueur connecté enregistre sa
 propre ligne via `record_game_result()`, seule voie d'écriture autorisée. Les
-points sont calculés en base, jamais fournis par le client.
+points sont calculés en base, jamais fournis par le client, et ne sont versés
+qu'une fois la victoire confirmée par un adversaire (voir plus bas).
 
 Pour que quatre joueurs se retrouvent rattachés à la *même* partie, chaque jeu
 produit une **signature** de son état final — faite de champs que tous les pairs
 voient à l'identique, et qui change à la revanche. Voir
 [src/features/account/gameOutcomes.ts](src/features/account/gameOutcomes.ts).
 
-Conséquence assumée : en P2P, un client modifié peut déclarer une victoire qui
-n'a pas eu lieu. Le garde-fou en base plafonne le nombre de vainqueurs par
-partie, ce qui attrape les incohérences accidentelles — pas un tricheur
-déterminé. C'est le bon niveau d'effort pour un site entre amis.
+**Une victoire se confirme par les adversaires** (migration
+[0014](supabase/migrations/0014_victoires_confirmees.sql)). Chaque joueur décrit
+la partie entière : les comptes gagnants (`p_winners`) et, à la Roulette, le
+chef qui l'a menée au bout (`p_chef`). Une victoire reste « en attente »
+(`won = false`, 0 point) tant qu'un adversaire — un compte qui n'a pas lui-même
+gagné — n'a pas nommé le même gagnant. Les voix du gagnant et de ceux qui le
+confirment l'emportent sur celles qui le démentent : à égalité (un contre un),
+la victoire est « contestée » et l'admin la tranche dans l'onglet Rapports ;
+démentie par la majorité, elle est refusée d'office. Une console ne suffit donc
+plus à s'offrir une victoire contre de vrais joueurs. Reste possible : deux
+comptes complices qui se confirment l'un l'autre, borné à 5 victoires payées
+par jour et par adversaire (`victory_pair_daily_cap`). Une partie ne compte pour
+les événements et le parrainage que si deux comptes au moins l'ont décrite.
+
+Limite connue : l'hôte d'une partie tient l'état complet, mains comprises. Un
+hôte modifié peut voir les cartes des autres ou fausser la donne ; seul un
+arbitre côté serveur l'empêcherait.
 
 Le mode solo et les parties contre des bots de Flip 7 ne sont pas enregistrés :
 ils se gagnent à volonté, et les compter mettrait en tête du classement le plus
@@ -334,8 +348,9 @@ contre des bots — Facile, Normal, Difficile, ou Aléatoire (chaque bot tire so
 niveau en secret). Aucune connexion : le navigateur tient la table comme l'hôte
 d'une partie en ligne, avec le même moteur, et joue pour les bots
 ([src/features/bots/](src/features/bots/), une IA par jeu dans `engine/ai.ts`).
-Ces parties comptent comme les autres (stats, FEES, trophées) ; le plafond de
-victoires payées par jour s'applique. `npm run test:bots` fait jouer des
+Depuis la migration 0014, ces parties entrent dans le nombre de parties jouées,
+mais ne rapportent ni victoire, ni points, ni FEES : jouées dans un seul
+navigateur, personne ne peut les confirmer. `npm run test:bots` fait jouer des
 centaines de parties bot contre bot : aucune ne doit se bloquer.
 
 **Cosmétiques en partie** : chaque joueur annonce son compte en rejoignant une
