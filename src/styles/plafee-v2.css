@@ -224,6 +224,7 @@ html[data-fx='calm'] .soc-avatar[data-border='rainbow'] { animation: none; box-s
 .plf-event-banner-inner, .plf-standing-inner { display: flex; align-items: center; gap: 12px; min-height: 44px; padding-top: 6px; padding-bottom: 6px; }
 .plf-event-banner-inner > svg { color: var(--neon); flex: none; }
 .plf-standing-inner > svg { flex: none; }
+.plf-standing-link { color: inherit; font-weight: 700; text-underline-offset: 3px; }
 .plf-event-banner-text { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
 .plf-event-banner-text strong { font-family: var(--font-pixel); font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--neon); text-shadow: var(--neon-glow-sm); }
 .plf-event-banner-text span { font-size: 13px; color: var(--ink-2); }

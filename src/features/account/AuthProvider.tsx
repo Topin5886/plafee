@@ -7,6 +7,7 @@ import { translateAuthError } from './validation';
 import { clearSavedPseudo, savePseudo } from '../rooms/playerName';
 import { clearReferral, pendingReferral } from '../plafee/api';
 import { setCurrentUserId } from './currentUser';
+import { TERMS_VERSION } from '../legal/legal';
 
 /** Remonte l'erreur Supabase en français, sans perdre la cause d'origine. */
 function fail(message: string): never {
@@ -144,8 +145,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
         options: {
           // Lu par le trigger `handle_new_user` pour créer le profil dans la
-          // même transaction que le compte — et le parrain d'un lien ?ref=.
-          data: { username: wanted, ...(pendingReferral() ? { ref: pendingReferral() } : {}) },
+          // même transaction que le compte — le parrain d'un lien ?ref=, et la
+          // version des CGU que le formulaire a fait accepter.
+          data: { username: wanted, terms_version: TERMS_VERSION, ...(pendingReferral() ? { ref: pendingReferral() } : {}) },
           emailRedirectTo: authRedirectUrl('compte'),
         },
       });

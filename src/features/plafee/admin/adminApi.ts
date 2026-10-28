@@ -69,7 +69,7 @@ export const getAdminPlayers = (search: string, limit = 50, offset = 0) =>
 export const banPlayer = (userId: string, reason: string) => rpc<void>('admin_ban', { p_user_id: userId, p_reason: reason });
 export const unbanPlayer = (userId: string) => rpc<void>('admin_unban', { p_user_id: userId });
 export const warnPlayer = (userId: string, message: string) => rpc<void>('admin_warn', { p_user_id: userId, p_message: message });
-export const resetStats = (userId: string) => rpc<void>('admin_reset_stats', { p_user_id: userId });
+export const resetStats = (userId: string, reason: string) => rpc<void>('admin_reset_stats', { p_user_id: userId, p_reason: reason });
 
 export interface AdminReport {
   id: number;

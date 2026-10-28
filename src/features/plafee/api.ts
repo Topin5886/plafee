@@ -58,9 +58,13 @@ export interface Standing {
   /** Rôle super_admin : accès au God mode. Absent avant la migration 0007. */
   is_super_admin?: boolean;
   warnings: { message: string; created_at: string }[];
+  /** Version des CGU acceptée, null si jamais. Absent avant la migration 0013. */
+  terms_version?: string | null;
 }
 
 export const getStanding = () => rpc<Standing>('my_standing');
+export const acceptTerms = (version: string) => rpc<void>('accept_terms', { p_version: version });
+export const deleteMyAccount = () => rpc<void>('delete_my_account');
 
 export const reportPlayer = (userId: string, reason: string, details: string) =>
   rpc<void>('report_player', { p_user_id: userId, p_reason: reason, p_details: details || null });
@@ -393,12 +397,16 @@ export const getRecentUnlocks = (days = 7, limit = 30) => rpc<RecentUnlock[]>('r
 // --- Visites -----------------------------------------------------------------------------
 
 const VISITOR_KEY = 'plafee-visitor';
+const VISITOR_SINCE_KEY = 'plafee-visitor-since';
 const VISIT_DAY_KEY = 'plafee-visit-day';
+/** Durée de vie maximale d'un traceur d'audience exempté selon la CNIL. */
+const VISITOR_MAX_AGE_MS = 395 * 86_400_000;
 
 /**
  * Une visite par navigateur et par jour, sans cookie ni empreinte : un
- * identifiant tiré au hasard, gardé dans ce navigateur. La base ne compte
- * que des visiteurs, elle ne sait pas qui ils sont.
+ * identifiant tiré au hasard, gardé dans ce navigateur et renouvelé tous les
+ * 13 mois. La base ne compte que des visiteurs, elle ne sait pas qui ils sont
+ * — même connectés (voir /confidentialite).
  */
 export async function trackVisit(): Promise<void> {
   let visitor: string | null = null;
@@ -406,10 +414,12 @@ export async function trackVisit(): Promise<void> {
   try {
     if (sessionStorage.getItem(VISIT_DAY_KEY) === today) return;
     visitor = localStorage.getItem(VISITOR_KEY);
-    if (!visitor || !/^[a-z0-9]{12,40}$/.test(visitor)) {
+    const since = Number(localStorage.getItem(VISITOR_SINCE_KEY));
+    if (!visitor || !/^[a-z0-9]{12,40}$/.test(visitor) || !since || Date.now() - since > VISITOR_MAX_AGE_MS) {
       const bytes = crypto.getRandomValues(new Uint8Array(12));
       visitor = Array.from(bytes, (b) => b.toString(36).padStart(2, '0')).join('').slice(0, 20);
       localStorage.setItem(VISITOR_KEY, visitor);
+      localStorage.setItem(VISITOR_SINCE_KEY, String(Date.now()));
     }
     sessionStorage.setItem(VISIT_DAY_KEY, today);
   } catch {

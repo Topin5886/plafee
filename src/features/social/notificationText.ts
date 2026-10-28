@@ -43,14 +43,23 @@ export function describeNotification(
         to: '/compte#fees',
       };
     case 'badge':
-      return { text: `Nouveau badge : ${n.payload.name ?? 'badge'}.`, to: '/compte#badges' };
+      return {
+        text: `Nouveau badge : ${n.payload.name ?? 'badge'}${n.payload.note ? ` — ${n.payload.note}` : ''}.`,
+        to: '/compte#badges',
+      };
     case 'event_completed':
       return {
         text: `Événement complété : ${n.payload.name ?? ''} ! Trophée débloqué${n.payload.fees ? `, +${n.payload.fees} FEES` : ''}.`,
         to: '/compte#trophees',
       };
     case 'warning':
-      return { text: `Avertissement de l'équipe PLAFEE : ${n.payload.message ?? ''}`, to: null };
+      return { text: `Avertissement de l'équipe PLAFEE : ${n.payload.message ?? ''}`, to: '/cgu#8-sanctions' };
+    case 'ban':
+      return { text: `Ton compte est suspendu. Motif : ${n.payload.reason ?? 'non précisé'}.`, to: '/cgu#8-sanctions' };
+    case 'unban':
+      return { text: 'Ton compte n’est plus suspendu. Bon retour à la table !', to: null };
+    case 'stats_reset':
+      return { text: `Tes statistiques ont été remises à zéro. Motif : ${n.payload.reason ?? 'non précisé'}.`, to: '/cgu#8-sanctions' };
     default:
       return { text: 'Nouvelle notification.', to: null };
   }

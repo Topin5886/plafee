@@ -20,6 +20,8 @@ import { SocialProvider } from './features/social/SocialProvider';
 import { PlafeeProvider } from './features/plafee/PlafeeProvider';
 import { EventBanner, EventPopup, StandingNotice } from './features/plafee/components/site';
 import { VictoryFx } from './features/plafee/components/VictoryFx';
+import { SiteFooter } from './features/legal/SiteFooter';
+import { LegalGate } from './features/legal/LegalGate';
 
 const Flip7Lobby = lazy(() => import('./features/flip7/Flip7Lobby').then(m => ({ default: m.Flip7Lobby })));
 const Flip7Room = lazy(() => import('./features/flip7/Flip7Room').then(m => ({ default: m.Flip7Room })));
@@ -40,6 +42,7 @@ const ShopPage = lazy(() => import('./features/plafee/pages/ShopPage').then(m =>
 const TrophyHallPage = lazy(() => import('./features/plafee/pages/TrophyHallPage').then(m => ({ default: m.TrophyHallPage })));
 const EventsPage = lazy(() => import('./features/plafee/pages/EventsPage').then(m => ({ default: m.EventsPage })));
 const AdminPage = lazy(() => import('./features/plafee/admin/AdminPage').then(m => ({ default: m.AdminPage })));
+const LegalPage = lazy(() => import('./features/legal/LegalPage'));
 
 function App() {
   return (
@@ -90,9 +93,14 @@ function App() {
           <Route path="/trophees" element={<TrophyHallPage />} />
           <Route path="/evenements" element={<EventsPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/mentions-legales" element={<LegalPage page="mentions-legales" />} />
+          <Route path="/confidentialite" element={<LegalPage page="confidentialite" />} />
+          <Route path="/cgu" element={<LegalPage page="cgu" />} />
           <Route path="*" element={<NotFound />} />
         </Routes></Suspense>
       </main>
+      <SiteFooter />
+      <LegalGate />
       </PlafeeProvider>
       </SocialProvider>
       </AuthProvider>

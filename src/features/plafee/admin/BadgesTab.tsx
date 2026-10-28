@@ -288,7 +288,7 @@ function AwardBadge({ badge, onClose, onDone }: { badge: BadgeRow; onClose: () =
         <Field label="Pseudo du joueur">
           <input className="neon-input" value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
         </Field>
-        <Field label="Précision (facultatif)" hint="Remplace le nom affiché : « Champion de septembre ».">
+        <Field label="Précision" hint="Remplace le nom affiché et part dans la notification du joueur. Obligatoire pour un badge de sanction : c'est son motif.">
           <input className="neon-input" value={note} maxLength={40} onChange={(e) => setNote(e.target.value)} />
         </Field>
       </div>

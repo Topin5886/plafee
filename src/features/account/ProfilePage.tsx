@@ -17,6 +17,7 @@ import { GameStats } from '../social/components/GameStats';
 import { RankStrip } from '../social/components/RankStrip';
 import { PlayerFlair } from '../plafee/components/bits';
 import { BadgesPanel, WalletPanel } from '../plafee/components/panels';
+import { DeleteAccountSection } from './components/DeleteAccountSection';
 
 const DATE_FMT = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 const SHORT_FMT = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -297,6 +298,8 @@ export function ProfilePage() {
             </div>
           )}
         </section>
+
+        <DeleteAccountSection />
       </div>
     </div>
   );

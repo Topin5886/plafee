@@ -20,11 +20,15 @@ export function LoginPage() {
   // D'où venait le joueur avant d'être renvoyé ici. Le ramener à sa page
   // d'origine vaut mieux que de le déposer systématiquement sur son profil.
   const from = (location.state as { from?: string } | null)?.from ?? '/';
+  // Arrivée ici juste après « Supprimer mon compte ».
+  const deleted = Boolean((location.state as { deleted?: boolean } | null)?.deleted);
 
   // Déjà connecté (session reprise, ou retour en arrière du navigateur) :
   // rediriger par le rendu plutôt qu'en appelant navigate() pendant celui-ci,
   // qui reviendrait à changer d'état au milieu d'un rendu.
-  if (status === 'signed-in') return <Navigate to={from} replace />;
+  // Juste après une suppression, la session locale peut mettre un instant à
+  // tomber : ne pas renvoyer vers l'accueil un compte qui n'existe plus.
+  if (status === 'signed-in' && !deleted) return <Navigate to={from} replace />;
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -45,6 +49,8 @@ export function LoginPage() {
         <form className="acc-card" onSubmit={onSubmit}>
           <h1 className="acc-title">Content de te revoir</h1>
           <p className="acc-subtitle">Connecte-toi pour retrouver tes statistiques.</p>
+
+          {deleted && <AccBanner tone="success">Ton compte et tes données ont été supprimés. Merci d'avoir joué sur PLAFEE !</AccBanner>}
 
           {!accountsEnabled && (
             <AccBanner tone="info">

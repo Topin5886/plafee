@@ -7,12 +7,14 @@ import { NeonButton } from './components/NeonButton';
 import { NeonInput } from './components/NeonInput';
 import { AccBanner } from './components/AccBanner';
 import { validateEmail, validatePassword, validateUsername } from './validation';
+import { TermsCheckbox } from '../legal/TermsCheckbox';
 
 interface FieldErrors {
   email?: string | null;
   username?: string | null;
   password?: string | null;
   confirm?: string | null;
+  terms?: string | null;
 }
 
 export function RegisterPage() {
@@ -23,6 +25,7 @@ export function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [terms, setTerms] = useState(false);
   const [fields, setFields] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -40,6 +43,7 @@ export function RegisterPage() {
       username: validateUsername(username),
       password: validatePassword(password),
       confirm: password !== confirm ? 'Les deux mots de passe diffèrent.' : null,
+      terms: terms ? null : 'Coche la case pour créer ton compte.',
     };
     setFields(found);
     if (Object.values(found).some(Boolean)) return;
@@ -150,6 +154,16 @@ export function RegisterPage() {
               error={fields.confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="••••••••"
+            />
+
+            <TermsCheckbox
+              checked={terms}
+              disabled={!accountsEnabled}
+              error={fields.terms}
+              onChange={(v) => {
+                setTerms(v);
+                if (v) setFields((f) => ({ ...f, terms: null }));
+              }}
             />
 
             <NeonButton

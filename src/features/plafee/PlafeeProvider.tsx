@@ -57,12 +57,13 @@ export function PlafeeProvider({ children }: { children: ReactNode }) {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [mine, setMine] = useState<Cosmetics | null>(null);
   const [events, setEvents] = useState<PlafeeEvent[]>([]);
-  const [nonce, setNonce] = useState({ wallet: 0, mine: 0, events: 0 });
+  const [nonce, setNonce] = useState({ wallet: 0, mine: 0, events: 0, standing: 0 });
 
   const bump = useCallback((key: keyof typeof nonce) => setNonce((n) => ({ ...n, [key]: n[key] + 1 })), []);
   const refreshWallet = useCallback(() => bump('wallet'), [bump]);
   const refreshMine = useCallback(() => bump('mine'), [bump]);
   const refreshEvents = useCallback(() => bump('events'), [bump]);
+  const refreshStanding = useCallback(() => bump('standing'), [bump]);
 
   // Un lien ?ref=pseudo se retient jusqu'à l'inscription.
   useEffect(() => {
@@ -86,7 +87,7 @@ export function PlafeeProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [uid]);
+  }, [uid, nonce.standing]);
 
   useEffect(() => {
     if (!uid) {
@@ -156,7 +157,13 @@ export function PlafeeProvider({ children }: { children: ReactNode }) {
         refreshMine();
         break;
       case 'warning':
-        getStanding().then(setStanding).catch(() => {});
+      case 'ban':
+      case 'unban':
+        refreshStanding();
+        break;
+      case 'stats_reset':
+        refreshMine();
+        refreshWallet();
         break;
     }
   });
@@ -164,6 +171,7 @@ export function PlafeeProvider({ children }: { children: ReactNode }) {
   const value = useMemo<PlafeeValue>(
     () => ({
       standing,
+      refreshStanding,
       isAdmin: Boolean(standing?.is_admin),
       isSuperAdmin: Boolean(standing?.is_super_admin),
       banned: Boolean(standing?.banned),
@@ -174,7 +182,7 @@ export function PlafeeProvider({ children }: { children: ReactNode }) {
       events,
       refreshEvents,
     }),
-    [standing, wallet, refreshWallet, mine, refreshMine, events, refreshEvents],
+    [standing, refreshStanding, wallet, refreshWallet, mine, refreshMine, events, refreshEvents],
   );
 
   return <PlafeeContext value={value}>{children}</PlafeeContext>;

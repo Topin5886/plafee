@@ -3,6 +3,7 @@ import type { Cosmetics, PlafeeEvent, Standing, Wallet } from './api';
 
 export interface PlafeeValue {
   standing: Standing | null;
+  refreshStanding: () => void;
   isAdmin: boolean;
   isSuperAdmin: boolean;
   banned: boolean;

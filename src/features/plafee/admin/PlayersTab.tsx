@@ -136,6 +136,7 @@ function PlayerDetail({ player, onChanged, onClose }: { player: AdminPlayer; onC
   const { isSuperAdmin } = usePlafee();
   const [msg, flash] = useFlash();
   const [reason, setReason] = useState('');
+  const [resetReason, setResetReason] = useState('');
   const [warning, setWarning] = useState('');
   const [amount, setAmount] = useState('');
   const [feesReason, setFeesReason] = useState('');
@@ -234,10 +235,15 @@ function PlayerDetail({ player, onChanged, onClose }: { player: AdminPlayer; onC
           <ConfirmAction variant="ghost" label={<><ShieldCheck size={14} aria-hidden /> Lever le ban</>} confirm="Confirmer le déban" onConfirm={() => run(() => unbanPlayer(player.user_id), 'Ban levé.')} />
         ) : (
           <>
-            <Field label="Motif (visible par le joueur)">
+            <Field label="Motif (obligatoire, envoyé au joueur)">
               <input className="neon-input" value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} placeholder="Ex : insultes répétées" />
             </Field>
-            <ConfirmAction label="Bannir le joueur" confirm="Confirmer le ban" onConfirm={() => run(() => banPlayer(player.user_id, reason), 'Joueur banni.')} />
+            <ConfirmAction
+              label="Bannir le joueur"
+              confirm="Confirmer le ban"
+              disabled={reason.trim().length < 3}
+              onConfirm={() => run(() => banPlayer(player.user_id, reason.trim()), 'Joueur banni et prévenu.')}
+            />
           </>
         )}
       </div>
@@ -276,7 +282,15 @@ function PlayerDetail({ player, onChanged, onClose }: { player: AdminPlayer; onC
           <RotateCcw size={15} aria-hidden /> Remise à zéro
         </h3>
         <p className="neon-hint">Efface ses parties, ses trophées et sa série. Son solde de FEES et ses achats restent. Irréversible.</p>
-        <ConfirmAction label="Remettre les stats à zéro" confirm="Oui, tout effacer" onConfirm={() => run(() => resetStats(player.user_id), 'Statistiques remises à zéro.')} />
+        <Field label="Motif (obligatoire, envoyé au joueur)">
+          <input className="neon-input" value={resetReason} maxLength={200} onChange={(e) => setResetReason(e.target.value)} placeholder="Ex : fausses victoires contre un second compte" />
+        </Field>
+        <ConfirmAction
+          label="Remettre les stats à zéro"
+          confirm="Oui, tout effacer"
+          disabled={resetReason.trim().length < 3}
+          onConfirm={() => run(() => resetStats(player.user_id, resetReason.trim()), 'Statistiques remises à zéro, joueur prévenu.').then(() => setResetReason(''))}
+        />
       </div>
     </aside>
   );

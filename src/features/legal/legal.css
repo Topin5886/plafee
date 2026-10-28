@@ -1,0 +1,187 @@
+/* --- Pages légales ------------------------------------------------------------------ */
+
+.legal-page {
+  max-width: 76ch;
+  margin: 0 auto;
+  padding: 40px 0 72px;
+  color: var(--ink-2);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.legal-page h1 {
+  margin: 0 0 6px;
+  font-family: var(--font-arcade);
+  font-size: clamp(16px, 4.4vw, 22px);
+  line-height: 1.4;
+  color: var(--neon);
+  text-shadow: var(--text-glow);
+}
+
+.legal-page h2 {
+  margin: 36px 0 10px;
+  font-size: 19px;
+  color: var(--ink);
+  scroll-margin-top: 96px;
+}
+
+.legal-page h3 {
+  margin: 22px 0 8px;
+  font-size: 16px;
+  color: var(--cyan);
+}
+
+.legal-page p,
+.legal-page ul,
+.legal-page ol {
+  margin: 0 0 12px;
+}
+
+.legal-page ul,
+.legal-page ol {
+  padding-left: 22px;
+}
+
+.legal-page li + li {
+  margin-top: 4px;
+}
+
+.legal-page strong {
+  color: var(--ink);
+}
+
+.legal-page a,
+.site-footer a,
+.legal-check a {
+  color: var(--neon);
+  text-underline-offset: 3px;
+}
+
+.legal-table-wrap {
+  margin: 0 0 16px;
+  overflow-x: auto;
+  border: 1px solid var(--line-2);
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.legal-table th,
+.legal-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal-table th {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+
+.legal-table tr:last-child td {
+  border-bottom: 0;
+}
+
+/* --- Pied de page ------------------------------------------------------------------- */
+
+.site-footer {
+  margin-top: 40px;
+  border-top: 1px solid var(--line-2);
+  background: rgb(var(--bg-rgb) / 0.85);
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding-top: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+/* --- Case CGU ----------------------------------------------------------------------- */
+
+.legal-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.legal-check input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--neon);
+}
+
+/* --- Nouvelles CGU à accepter --------------------------------------------------------- */
+
+.legal-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.78);
+  overflow-y: auto;
+}
+
+.legal-gate-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(100%, 520px);
+}
+
+.legal-gate-card p {
+  margin: 0;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.legal-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* --- Zone de suppression du compte ----------------------------------------------------- */
+
+.acc-danger-zone {
+  border-color: rgb(var(--danger-rgb) / 0.6);
+}
+
+.acc-danger-zone .acc-section-title {
+  color: var(--danger);
+}
+
+.acc-danger-zone p {
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.acc-danger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}

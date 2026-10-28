@@ -7,6 +7,7 @@ import { usePlafee } from '../usePlafee';
 import { OBJECTIVE_LABELS, timeLeft, type PlafeeEvent } from '../api';
 import { eventProgress, objectiveText } from '../format';
 import { FeesAmount, RarityTag } from './bits';
+import { contestHref } from '../../legal/legal';
 
 /** Se remet à jour chaque minute, pour les comptes à rebours. */
 function useMinuteClock() {
@@ -228,7 +229,10 @@ export function StandingNotice() {
           <span>
             <strong>Ton compte est suspendu.</strong> Tu peux encore jouer en invité, mais tes parties ne comptent plus et tu ne peux plus
             écrire aux autres.
-            {standing.ban_reason && <> Motif : {standing.ban_reason}.</>}
+            {standing.ban_reason && <> Motif : {standing.ban_reason}.</>}{' '}
+            <a href={contestHref('bannissement')} className="plf-standing-link">
+              Contester
+            </a>
           </span>
         </div>
       </div>
@@ -280,7 +284,10 @@ function WarningNotice({ warnings }: { warnings: { message: string; created_at: 
       <div className="container plf-standing-inner">
         <ShieldAlert size={18} aria-hidden />
         <span>
-          <strong>Avertissement de l'équipe PLAFEE :</strong> {recent.message}
+          <strong>Avertissement de l'équipe PLAFEE :</strong> {recent.message}{' '}
+          <a href={contestHref('avertissement')} className="plf-standing-link">
+            Contester
+          </a>
         </span>
         <button type="button" className="plf-event-banner-close" onClick={close} aria-label="Fermer">
           <X size={16} />

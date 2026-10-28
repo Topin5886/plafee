@@ -87,7 +87,10 @@ export type NotificationKind =
   | 'fees'
   | 'badge'
   | 'event_completed'
-  | 'warning';
+  | 'warning'
+  | 'ban'
+  | 'unban'
+  | 'stats_reset';
 
 export interface AppNotification {
   id: number;
@@ -114,6 +117,10 @@ export interface AppNotification {
     event_id?: string;
     fees?: number;
     message?: string;
+    /** Motif d'une sanction (ban, remise à zéro). */
+    reason?: string;
+    /** Note jointe à un badge décerné par un admin. */
+    note?: string | null;
   };
   created_at: string;
   read_at: string | null;
