@@ -18,7 +18,7 @@ interface FieldErrors {
 }
 
 export function RegisterPage() {
-  const { signUp, status } = useAuth();
+  const { signUp, resendConfirmation, status } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -30,6 +30,9 @@ export function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
+  const [resendNotice, setResendNotice] = useState<string | null>(null);
+  const [resendError, setResendError] = useState<string | null>(null);
 
   if (status === 'signed-in') return <Navigate to="/" replace />;
 
@@ -65,6 +68,25 @@ export function RegisterPage() {
   }
 
   /*
+   * Un premier envoi peut se perdre (filtre anti-spam, quota Supabase). Le
+   * bouton évite de recréer un compte — ce qui échouerait avec « compte déjà
+   * existant » — pour recevoir un nouveau lien.
+   */
+  async function onResend() {
+    setResendBusy(true);
+    setResendNotice(null);
+    setResendError(null);
+    try {
+      await resendConfirmation(email);
+      setResendNotice(`Un nouvel e-mail est parti vers ${email}. Pense à vérifier les indésirables.`);
+    } catch (err) {
+      setResendError(err instanceof Error ? err.message : 'Envoi impossible.');
+    } finally {
+      setResendBusy(false);
+    }
+  }
+
+  /*
    * Le projet Supabase peut exiger une confirmation par e-mail. Dans ce cas le
    * compte existe mais aucune session n'est ouverte : rediriger vers le profil
    * afficherait une page vide et laisserait croire à un échec.
@@ -81,6 +103,13 @@ export function RegisterPage() {
               <strong>{email}</strong>. Clique le lien qu'il contient pour activer ton compte, puis
               reviens te connecter.
             </AccBanner>
+            <div className="acc-confirm">
+              {resendNotice && <AccBanner tone="success">{resendNotice}</AccBanner>}
+              {resendError && <AccBanner tone="error">{resendError}</AccBanner>}
+              <NeonButton variant="ghost" block loading={resendBusy} onClick={() => void onResend()}>
+                Renvoyer l'e-mail de confirmation
+              </NeonButton>
+            </div>
             <p className="acc-switch">
               <Link to="/connexion">Retour à la connexion</Link>
             </p>

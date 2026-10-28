@@ -8,7 +8,7 @@ import { NeonInput } from './components/NeonInput';
 import { AccBanner } from './components/AccBanner';
 
 export function LoginPage() {
-  const { signIn, status } = useAuth();
+  const { signIn, resendConfirmation, authLinkError, status } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,6 +16,10 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
+  const [resendNotice, setResendNotice] = useState<string | null>(null);
+  const [resendError, setResendError] = useState<string | null>(null);
 
   // D'où venait le joueur avant d'être renvoyé ici. Le ramener à sa page
   // d'origine vaut mieux que de le déposer systématiquement sur son profil.
@@ -33,13 +37,36 @@ export function LoginPage() {
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    setResendNotice(null);
+    setResendError(null);
+    setUnconfirmed(false);
     setBusy(true);
     try {
       await signIn(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Connexion impossible.');
+      const message = err instanceof Error ? err.message : 'Connexion impossible.';
+      setError(message);
+      // Proposé seulement quand Supabase dit explicitement que l'adresse
+      // attend encore sa confirmation : inutile de renvoyer un lien à
+      // quelqu'un dont le mot de passe est simplement faux.
+      setUnconfirmed(message.includes('pas encore confirmée'));
       setBusy(false);
+    }
+  }
+
+  async function onResend() {
+    setResendBusy(true);
+    setResendNotice(null);
+    setResendError(null);
+    try {
+      await resendConfirmation(email);
+      setResendNotice(`Un nouvel e-mail est parti vers ${email}. Pense à vérifier les indésirables.`);
+      setUnconfirmed(false);
+    } catch (err) {
+      setResendError(err instanceof Error ? err.message : 'Envoi impossible.');
+    } finally {
+      setResendBusy(false);
     }
   }
 
@@ -60,7 +87,12 @@ export function LoginPage() {
           )}
 
           <div className="acc-form">
+            {authLinkError && !error && !resendNotice && (
+              <AccBanner tone="error">{authLinkError}</AccBanner>
+            )}
             {error && <AccBanner tone="error">{error}</AccBanner>}
+            {resendNotice && <AccBanner tone="success">{resendNotice}</AccBanner>}
+            {resendError && <AccBanner tone="error">{resendError}</AccBanner>}
 
             <NeonInput
               label="E-mail"
@@ -94,6 +126,18 @@ export function LoginPage() {
             >
               Se connecter
             </NeonButton>
+
+            {unconfirmed && (
+              <NeonButton
+                variant="ghost"
+                block
+                loading={resendBusy}
+                disabled={!email.trim()}
+                onClick={() => void onResend()}
+              >
+                Renvoyer l'e-mail de confirmation
+              </NeonButton>
+            )}
           </div>
 
           <p className="acc-switch">

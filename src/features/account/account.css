@@ -76,6 +76,14 @@ html[data-fx='calm'] .acc-card::before { animation: none; opacity: 0.25; }
   gap: 18px;
 }
 
+/* Écran « Presque fini » : renvoi de l'e-mail de confirmation. */
+.acc-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
 .acc-switch {
   margin-top: 22px;
   text-align: center;

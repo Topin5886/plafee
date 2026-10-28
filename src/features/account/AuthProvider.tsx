@@ -14,6 +14,46 @@ function fail(message: string): never {
   throw new Error(translateAuthError(message));
 }
 
+/**
+ * Supabase renvoie les erreurs de lien de confirmation dans le fragment
+ * (`#error=access_denied&error_code=otp_expired…`) ou dans la requête, selon
+ * le flux. Sans ce décodage, le joueur atterrit sur « Connexion » sans aucune
+ * explication.
+ */
+function readAuthLinkError(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  const url = new URL(window.location.href);
+  const hash = new URLSearchParams(url.hash.replace(/^#/, ''));
+  const code = url.searchParams.get('error_code') ?? hash.get('error_code');
+  const error = url.searchParams.get('error') ?? hash.get('error');
+  const description = url.searchParams.get('error_description') ?? hash.get('error_description');
+
+  if (!error && !code) return null;
+  if (code === 'otp_expired') {
+    return 'Ce lien de confirmation a expiré ou a déjà servi. Demande un nouvel e-mail.';
+  }
+  return description || 'Le lien de confirmation est invalide. Demande un nouvel e-mail.';
+}
+
+/** Retire les paramètres d'erreur pour qu'un rechargement ne les rejoue pas. */
+function stripAuthLinkError() {
+  if (typeof window === 'undefined') return;
+
+  const url = new URL(window.location.href);
+  const hash = new URLSearchParams(url.hash.replace(/^#/, ''));
+  if (!url.searchParams.has('error') && !url.searchParams.has('error_code') && !hash.has('error')) return;
+
+  for (const params of [url.searchParams, hash]) {
+    params.delete('error');
+    params.delete('error_code');
+    params.delete('error_description');
+    params.delete('sb');
+  }
+  url.hash = hash.toString() ? `#${hash.toString()}` : '';
+  window.history.replaceState(window.history.state, '', url);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthValue['status']>(
     // Sans configuration, il n'y a pas de session à attendre : on part
@@ -22,6 +62,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  // Lu une seule fois, au montage : le fragment est ensuite nettoyé pour
+  // qu'un rechargement de /connexion ne répète pas l'erreur.
+  const [authLinkError] = useState<string | null>(() => (accountsEnabled ? readAuthLinkError() : null));
+
+  useEffect(() => {
+    if (accountsEnabled) stripAuthLinkError();
+  }, []);
 
   const userId = session?.user.id ?? null;
 
@@ -159,6 +206,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const resendConfirmation = useCallback(async (email: string) => {
+    const { error } = await (await getSupabase()).auth.resend({
+      type: 'signup',
+      email: email.trim(),
+      options: { emailRedirectTo: authRedirectUrl('compte') },
+    });
+    if (error) fail(error.message);
+  }, []);
+
   const signOut = useCallback(async () => {
     const { error } = await (await getSupabase()).auth.signOut();
     if (error) fail(error.message);
@@ -215,13 +271,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       profile,
+      authLinkError,
       signIn,
       signUp,
+      resendConfirmation,
       signOut,
       updateProfile,
       refreshProfile,
     }),
-    [status, session, profile, signIn, signUp, signOut, updateProfile, refreshProfile],
+    [status, session, profile, authLinkError, signIn, signUp, resendConfirmation, signOut, updateProfile, refreshProfile],
   );
 
   return <AuthContext value={value}>{children}</AuthContext>;

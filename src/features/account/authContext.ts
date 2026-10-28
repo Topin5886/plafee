@@ -22,8 +22,15 @@ export interface AuthValue {
   user: User | null;
   /** Null tant que le profil n'est pas chargé, même session ouverte. */
   profile: Profile | null;
+  /**
+   * Erreur renvoyée par Supabase quand le lien de confirmation revient sur le
+   * site (lien expiré, déjà utilisé, etc.), sinon null.
+   */
+  authLinkError: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, username: string, password: string) => Promise<SignUpResult>;
+  /** Renvoie l'e-mail de confirmation d'un compte pas encore activé. */
+  resendConfirmation: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (patch: Partial<Pick<Profile, 'username' | 'bio' | 'avatar' | 'preferences'>>) => Promise<void>;
   refreshProfile: () => Promise<void>;

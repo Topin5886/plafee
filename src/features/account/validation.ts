@@ -52,6 +52,7 @@ export function translateAuthError(message: string): string {
   const m = message.toLowerCase();
   if (m.includes('invalid login credentials')) return 'E-mail ou mot de passe incorrect.';
   if (m.includes('email not confirmed')) return "Ton adresse n'est pas encore confirmée — regarde tes e-mails.";
+  if (m.includes('already confirmed')) return 'Ton adresse est déjà confirmée : tu peux te connecter.';
   if (m.includes('user already registered') || m.includes('already been registered'))
     return 'Un compte existe déjà avec cette adresse.';
   if (m.includes('password should be at least')) return 'Mot de passe trop court.';

@@ -149,6 +149,42 @@ que le navigateur doit connaître finit dans le bundle publié, et la clé
 Security en base — jamais la confidentialité de cette clé. **Ne jamais placer
 ici la clé `service_role`**, qui, elle, contourne la RLS.
 
+### Confirmation par e-mail
+
+L'envoi est entièrement délégué à **Supabase Auth** par `signUp()` (voir
+[AuthProvider.tsx](src/features/account/AuthProvider.tsx)). Le dépôt ne contient
+ni Nodemailer, ni Resend, ni SendGrid, et aucune clé SMTP ne doit être ajoutée
+dans `.env` : un secret y serait public. Deux réglages du tableau de bord
+Supabase sont donc indispensables.
+
+**1. Authentication → URL Configuration**
+
+| Champ | Valeur |
+| --- | --- |
+| Site URL | `https://topin5886.github.io/plafee/` |
+| Redirect URLs | `https://topin5886.github.io/plafee/**` et `http://localhost:5173/plafee/**` |
+
+Si l'URL de production n'est pas dans cette liste, Supabase **ignore**
+`emailRedirectTo` et renvoie le lien de confirmation vers la Site URL — par
+défaut `http://localhost:3000`, donc vers une adresse qui n'existe pas chez le
+joueur. C'est la panne la plus fréquente, et elle ne produit aucune erreur
+visible dans le navigateur.
+
+**2. Authentication → SMTP Settings**
+
+Brancher un vrai service d'envoi (Resend, Brevo, SendGrid…) avec un domaine
+vérifié (SPF/DKIM inclus). Le SMTP intégré de Supabase est réservé aux tests :
+il ne livre qu'aux membres de l'organisation et plafonne à **2 e-mails par
+heure** pour tout le projet. Un visiteur extérieur ne recevra donc jamais son
+lien tant que le SMTP personnalisé n'est pas configuré.
+
+Le template « Confirm signup » doit conserver `{{ .ConfirmationURL }}`. Le
+client utilise le flux **PKCE** : le lien doit être ouvert dans le navigateur
+qui a créé le compte, car le vérificateur y est stocké. Pour accepter aussi
+l'ouverture sur un autre appareil, remplacer le template par
+`{{ .TokenHash }}` et appeler `verifyOtp({ token_hash, type: 'signup' })` sur
+une route dédiée.
+
 ### Schéma
 
 [supabase/migrations/0001_accounts_and_stats.sql](supabase/migrations/0001_accounts_and_stats.sql)
