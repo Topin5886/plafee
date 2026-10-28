@@ -16,6 +16,40 @@ export interface PatchNote {
 
 export const PATCH_NOTES: PatchNote[] = [
   {
+    version: '2026-10-28-president',
+    date: '28 octobre 2026',
+    title: 'Le Président entre en salle',
+    sections: [
+      {
+        title: 'Nouveau jeu : le Président',
+        items: [
+          'Le jeu de cartes des fins de soirée, de 3 à 7 joueurs : vide ta main avant les autres. Le 2 est la plus forte carte.',
+          'Pose 1 à 4 cartes de même valeur ; les suivants posent autant de cartes, de valeur égale ou supérieure, ou passent. Un 2 ou un carré coupe le pli.',
+          'Règle « X ou rien » (activable) : si tu rejoues la même valeur, le suivant doit la poser à son tour ou passer.',
+          'L’ordre de sortie donne les rôles : Président, Vice-président, Neutres, Vice-trou et Trou du cul. Et à la manche suivante, le Trou du cul donne ses meilleures cartes au Président.',
+          'Une partie en 3, 5 ou 7 manches : chaque manche rapporte des points selon ta place, le meilleur total gagne.',
+          'En ligne avec tes potes, ou tout de suite contre des bots (facile, normal, difficile).',
+          '7 trophées à débloquer, de « Premier mandat » à « Président à vie », en passant par « Du trou au trône ».',
+        ],
+      },
+      {
+        title: 'Des victoires confirmées',
+        items: [
+          'Une victoire en ligne compte une fois qu’un adversaire l’a confirmée : sa partie à lui doit désigner le même gagnant. Fini les victoires inventées.',
+          'En cas de désaccord, la victoire est contestée et un admin tranche.',
+          'Les parties contre les bots entrent dans tes stats, mais sans points, FEES ni victoire comptée.',
+          'Les points de classement suivent le plafond des FEES : 30 victoires payées par jour, dont 5 au plus contre le même adversaire.',
+        ],
+      },
+      {
+        title: 'Compte',
+        items: [
+          'E-mail de confirmation pas reçu ou lien expiré ? Tu peux le redemander depuis l’inscription ou la connexion.',
+        ],
+      },
+    ],
+  },
+  {
     version: '2026-10-28',
     date: '28 octobre 2026',
     title: 'La salle s’agrandit',
