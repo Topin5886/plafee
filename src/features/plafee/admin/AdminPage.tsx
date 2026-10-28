@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Award, BarChart3, Coins, Flag, Gauge, PartyPopper, ScrollText, ShieldAlert, Tag, Users, Zap } from 'lucide-react';
+import { Award, BarChart3, Coins, Flag, Gauge, PartyPopper, ScrollText, ShieldAlert, Sparkles, Tag, Users, Zap } from 'lucide-react';
 import { useAuth } from '../../account/useAuth';
 import { usePlafee } from '../usePlafee';
 import { StatsTab } from './StatsTab';
@@ -11,6 +11,7 @@ import { ModerationTab } from './ModerationTab';
 import { ReportsTab } from './ReportsTab';
 import { FeesTab } from './FeesTab';
 import { LogsTab } from './LogsTab';
+import { LogoTestTab } from './LogoTestTab';
 import { GodTab } from './GodTab';
 import './admin.css';
 
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'rapports', label: 'Rapports', icon: Flag, Panel: ReportsTab },
   { id: 'fees', label: 'FEES', icon: Coins, Panel: FeesTab },
   { id: 'journal', label: 'Journal', icon: ScrollText, Panel: LogsTab },
+  { id: 'animation', label: 'Animation', icon: Sparkles, Panel: LogoTestTab },
   // Réservé au super admin : la base refuse les autres de toute façon.
   { id: 'god', label: 'God mode', icon: Zap, Panel: GodTab, superOnly: true },
 ];

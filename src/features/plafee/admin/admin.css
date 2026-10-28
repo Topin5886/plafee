@@ -290,3 +290,94 @@
 .god-errors { margin: 0; padding-left: 18px; font-size: 13px; color: var(--danger); }
 
 .adm-log-god { min-width: 240px; font-size: 13px; color: var(--ink); }
+
+/* --- Banc d'essai de l'animation du logo ------------------------------------ */
+
+.adm-logo-test .acc-section-title { display: flex; align-items: center; gap: 8px; margin: 0; }
+.adm-logo-test > .neon-hint { margin: 8px 0 0; }
+
+/* La borne d'essai : le fond s'éclaire au rythme du logo. */
+.adm-logo-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+  margin: 16px 0 12px;
+  padding: 28px 16px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--neon-rgb) / 0.25);
+  background:
+    radial-gradient(circle at 50% 55%, rgb(var(--neon-rgb) / 0.14), transparent 65%),
+    var(--well);
+}
+
+.adm-logo-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 55%, rgb(var(--neon-rgb) / 0.16), transparent 60%);
+  opacity: 0;
+  animation: adm-logo-glow 4.6s ease-in-out 1.4s infinite;
+  pointer-events: none;
+}
+
+.adm-logo-lockup {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: var(--neon);
+  animation: adm-logo-rise 0.8s ease-out both;
+}
+
+.adm-logo-mark {
+  width: auto;
+  height: clamp(88px, 12vh, 112px);
+  filter: drop-shadow(0 0 16px rgb(var(--neon-rgb) / 0.55));
+}
+
+.adm-logo-wordmark {
+  width: min(260px, 62vw);
+  filter: drop-shadow(0 0 10px rgb(var(--neon-rgb) / 0.45));
+}
+
+/* Une ligne de néon traverse la borne une fois par lecture, après l'allumage. */
+.adm-logo-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 46%,
+    rgb(var(--neon-rgb) / 0.16) 49%,
+    rgb(var(--neon-rgb) / 0.75) 50%,
+    rgb(var(--neon-rgb) / 0.16) 51%,
+    transparent 54%
+  );
+  animation: adm-logo-scan 1.7s ease-in-out 0.75s both;
+  pointer-events: none;
+}
+
+@keyframes adm-logo-rise {
+  from { transform: translateY(10px) scale(0.97); }
+  to { transform: translateY(0) scale(1); }
+}
+
+@keyframes adm-logo-scan {
+  from { transform: translateY(-100%); opacity: 0; }
+  20%, 80% { opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes adm-logo-glow {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-logo-lockup, .adm-logo-scan, .adm-logo-stage::after { animation: none; }
+  .adm-logo-scan { opacity: 0; }
+  .adm-logo-stage::after { opacity: 0.35; }
+}
