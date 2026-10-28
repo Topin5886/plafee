@@ -1,6 +1,6 @@
 import { lazy, Suspense, useId, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Award, Camera, Gauge, House, LogIn, LogOut, PartyPopper, Settings, Store, Trophy, User, Users } from 'lucide-react';
+import { Award, Camera, CircleUserRound, LogIn, LogOut, User, Users } from 'lucide-react';
 import { accountsEnabled } from '../../../lib/supabase';
 import { useAuth } from '../useAuth';
 import { useSocial } from '../../social/useSocial';
@@ -12,7 +12,8 @@ const AvatarUpload = lazy(() => import('./AvatarUpload').then((m) => ({ default:
 
 /**
  * Le contrôle de compte de l'en-tête : le bouton du panneau d'amis, puis
- * l'avatar et son menu.
+ * l'avatar et son menu (profil, compte, trophées, photo, déconnexion). La
+ * navigation du site est dans le menu principal (MainMenu).
  *
  * Le menu est un `popover` natif : couche supérieure au-dessus de la scène 3D
  * et des plateaux, Échap et clic extérieur gérés par le navigateur, focus
@@ -21,7 +22,7 @@ const AvatarUpload = lazy(() => import('./AvatarUpload').then((m) => ({ default:
 export function AccountMenu() {
   const { status, profile, signOut } = useAuth();
   const { panelOpen, setPanelOpen, online, friends } = useSocial();
-  const { wallet, isAdmin } = usePlafee();
+  const { wallet } = usePlafee();
   const navigate = useNavigate();
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -85,33 +86,16 @@ export function AccountMenu() {
             <FeesAmount value={wallet?.balance ?? 0} size="sm" />
           </div>
         )}
-        {isAdmin && (
-          <Link role="menuitem" to="/admin" onClick={close} className="acc-menu-admin">
-            <Gauge size={16} aria-hidden /> Dashboard admin
-          </Link>
-        )}
-        <Link role="menuitem" to="/" onClick={close}>
-          <House size={16} aria-hidden /> Accueil
-        </Link>
         {profile && (
           <Link role="menuitem" to={`/joueur/${profile.username}`} onClick={close}>
             <User size={16} aria-hidden /> Voir mon profil
           </Link>
         )}
+        <Link role="menuitem" to="/compte" onClick={close}>
+          <CircleUserRound size={16} aria-hidden /> Mon compte
+        </Link>
         <Link role="menuitem" to="/compte#trophees" onClick={close}>
           <Award size={16} aria-hidden /> Mes trophées
-        </Link>
-        <Link role="menuitem" to="/boutique" onClick={close}>
-          <Store size={16} aria-hidden /> Boutique
-        </Link>
-        <Link role="menuitem" to="/trophees" onClick={close}>
-          <Trophy size={16} aria-hidden /> Hall des trophées
-        </Link>
-        <Link role="menuitem" to="/evenements" onClick={close}>
-          <PartyPopper size={16} aria-hidden /> Événements
-        </Link>
-        <Link role="menuitem" to="/classements" onClick={close}>
-          <Trophy size={16} aria-hidden /> Classements
         </Link>
         <button
           type="button"
@@ -123,9 +107,6 @@ export function AccountMenu() {
         >
           <Camera size={16} aria-hidden /> Changer ma photo
         </button>
-        <Link role="menuitem" to="/compte" onClick={close}>
-          <Settings size={16} aria-hidden /> Paramètres
-        </Link>
         <button
           type="button"
           role="menuitem"

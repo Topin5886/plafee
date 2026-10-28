@@ -633,3 +633,269 @@ html[data-fx='calm'] :is(.scopa-lobby-card, .p4-lobby-card, .sess-panel, .f7-set
     opacity: 0.25;
   }
 }
+
+/* --- Menu principal (MainMenu.tsx) ---------------------------------------------- */
+
+/* Le bouton « trois traits », à gauche du logo, à la taille des commandes. */
+.main-menu-btn {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--hdr-box, 40px);
+  height: var(--hdr-box, 40px);
+  padding: 0;
+  border: 2px solid rgb(var(--neon-rgb) / 0.55);
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--neon);
+  cursor: pointer;
+  transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out, background 0.2s ease-out;
+}
+
+.main-menu-btn:hover,
+.main-menu-btn[data-open] {
+  border-color: var(--neon);
+  background: rgb(var(--neon-rgb) / 0.12);
+  box-shadow: var(--neon-glow, 0 0 12px rgb(var(--neon-rgb) / 0.6));
+}
+
+.main-menu-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+.main-menu-bars { display: grid; gap: 4px; width: 18px; }
+
+.main-menu-bars > span {
+  display: block;
+  height: 3px;
+  background: currentColor;
+  box-shadow: 0 0 6px rgb(var(--neon-rgb) / 0.8);
+  transition: transform 0.25s steps(4), opacity 0.2s, width 0.25s steps(4);
+}
+
+/* Trois traits inégaux qui s'alignent au survol, puis se croisent à l'ouverture. */
+.main-menu-bars > span:nth-child(2) { width: 70%; }
+.main-menu-bars > span:nth-child(3) { width: 85%; }
+.main-menu-btn:hover .main-menu-bars > span { width: 100%; }
+.main-menu-btn[data-open] .main-menu-bars > span { width: 100%; }
+.main-menu-btn[data-open] .main-menu-bars > span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.main-menu-btn[data-open] .main-menu-bars > span:nth-child(2) { opacity: 0; }
+.main-menu-btn[data-open] .main-menu-bars > span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Une invitation d'ami ou de groupe en attente : une pastille sur le bouton. */
+.main-menu-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background: var(--magenta);
+  box-shadow: 0 0 8px rgb(var(--magenta-rgb) / 0.9);
+  animation: main-menu-blink 1.2s steps(2) infinite;
+}
+
+/* Le tiroir : toute la hauteur, depuis la gauche. */
+.main-menu {
+  position: fixed;
+  inset: 0 auto 0 0;
+  display: none;
+  flex-direction: column;
+  width: min(320px, 86vw);
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 14px);
+  overflow-y: auto;
+  border: none;
+  border-right: 2px solid var(--neon);
+  border-radius: 0;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(0deg, rgb(var(--neon-rgb) / 0.035) 0 1px, transparent 1px 4px),
+    var(--panel);
+  box-shadow: 0 0 22px rgb(var(--neon-rgb) / 0.45), 30px 0 80px rgb(0 0 0 / 0.6);
+}
+
+.main-menu:popover-open {
+  display: flex;
+  animation: main-menu-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+.main-menu::backdrop {
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.main-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 4px 14px;
+  border-bottom: 2px dashed rgb(var(--neon-rgb) / 0.35);
+}
+
+.main-menu-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon);
+  text-shadow: 0 0 8px rgb(var(--neon-rgb) / 0.7);
+}
+
+.main-menu-caret { font-size: 11px; animation: main-menu-blink 1s steps(2) infinite; }
+
+.main-menu-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 2px solid rgb(var(--neon-rgb) / 0.45);
+  border-radius: 0;
+  background: none;
+  color: var(--neon);
+  cursor: pointer;
+}
+
+.main-menu-close:hover { border-color: var(--neon); box-shadow: 0 0 10px rgb(var(--neon-rgb) / 0.6); }
+.main-menu-close:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+.main-menu-body { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
+
+.main-menu-section { display: flex; flex-direction: column; gap: 2px; }
+
+.main-menu-section-title {
+  margin: 0 0 4px;
+  padding: 0 10px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--magenta);
+}
+
+.main-menu-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-left: 3px solid transparent;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s ease-out, color 0.15s ease-out, border-color 0.15s ease-out;
+}
+
+.main-menu:popover-open .main-menu-link {
+  animation: main-menu-item-in 0.32s ease-out both;
+  animation-delay: calc(var(--i, 0) * 28ms + 60ms);
+}
+
+.main-menu-link svg { flex: none; color: var(--neon-deep); }
+
+.main-menu-num {
+  width: 20px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: rgb(var(--neon-rgb) / 0.45);
+}
+
+.main-menu-label { flex: 1 1 auto; min-width: 0; }
+
+.main-menu-arrow {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--neon);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+.main-menu-link:hover,
+.main-menu-link:focus-visible {
+  outline: none;
+  border-left-color: var(--neon);
+  background: rgb(var(--neon-rgb) / 0.1);
+  color: var(--neon);
+}
+
+.main-menu-link:hover svg,
+.main-menu-link:focus-visible svg { color: var(--neon); }
+
+.main-menu-link:hover .main-menu-arrow,
+.main-menu-link:focus-visible .main-menu-arrow { opacity: 1; transform: none; }
+
+/* La page où l'on est : allumée, comme l'onglet actif de l'en-tête. */
+.main-menu-link.active {
+  border-left-color: var(--neon);
+  background: rgb(var(--neon-rgb) / 0.16);
+  color: var(--neon);
+  text-shadow: 0 0 6px rgb(var(--neon-rgb) / 0.6);
+}
+
+.main-menu-link.active svg,
+.main-menu-link.active .main-menu-num { color: var(--neon); }
+
+.main-menu-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 2px dashed rgb(var(--neon-rgb) / 0.35);
+}
+
+.main-menu-admin,
+.main-menu-admin svg { color: var(--magenta) !important; }
+.main-menu-admin:hover,
+.main-menu-admin.active { border-left-color: var(--magenta); background: rgb(var(--magenta-rgb) / 0.1); text-shadow: none; }
+.main-menu-admin .main-menu-arrow { color: var(--magenta); }
+
+.main-menu-hint {
+  margin: 12px 0 0;
+  font-size: 11px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.main-menu-hint kbd {
+  padding: 1px 5px;
+  border: 1px solid rgb(var(--neon-rgb) / 0.45);
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--neon);
+}
+
+/* Sans « Paramètres » en pied (visiteur), l'astuce descend tout en bas. */
+.main-menu-body:last-of-type + .main-menu-hint { margin-top: auto; }
+
+@media (hover: none) { .main-menu-hint { display: none; } }
+
+.site-header[data-fit='tiny'] .main-menu-bars { width: 16px; }
+
+@keyframes main-menu-in {
+  from { transform: translateX(-100%); opacity: 0.4; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes main-menu-item-in {
+  from { transform: translateX(-14px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes main-menu-blink { 50% { opacity: 0.25; } }
+
+html[data-fx='calm'] :is(.main-menu, .main-menu-link, .main-menu-caret, .main-menu-dot) { animation: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.main-menu, .main-menu-link, .main-menu-caret, .main-menu-dot) { animation: none !important; }
+  .main-menu-bars > span { transition: none; }
+}

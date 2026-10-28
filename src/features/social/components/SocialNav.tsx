@@ -1,25 +1,22 @@
 import { NavLink } from 'react-router-dom';
-import { House, MessagesSquare, Radio, Store, Trophy, User, Users } from 'lucide-react';
+import { House, Store, Trophy } from 'lucide-react';
 import { useSocial } from '../useSocial';
 
 /**
  * La navigation de l'espace compte, en tête de chacune de ses pages.
  *
- * Des onglets dans la page plutôt qu'un menu déroulant dans l'en-tête : cinq
- * destinations restent visibles d'un coup d'oeil, et l'en-tête, qui flotte
- * au-dessus des plateaux de jeu, garde sa sobriété.
+ * Trois destinations visibles d'un coup d'oeil ; le reste du site est rangé
+ * dans le menu principal (MainMenu), et le compte derrière l'avatar.
  */
 export function SocialNav({ variant = 'page' }: { variant?: 'page' | 'header' }) {
-  const { incoming, groupInvitations, active } = useSocial();
+  const { active } = useSocial();
 
+  // L'essentiel seulement : Amis a son bouton dans l'en-tête, Groupes et
+  // Sessions sont dans le menu « trois traits », le profil derrière l'avatar.
   const links = [
     { to: '/', label: 'Accueil', icon: House, badge: 0 },
-    { to: '/amis', label: 'Amis', icon: Users, badge: incoming.length },
-    { to: '/groupes', label: 'Groupes', icon: MessagesSquare, badge: groupInvitations.length },
-    { to: '/sessions', label: 'Sessions', icon: Radio, badge: 0 },
     { to: '/classements', label: 'Classements', icon: Trophy, badge: 0 },
     { to: '/boutique', label: 'Boutique', icon: Store, badge: 0 },
-    { to: '/compte', label: 'Profil', icon: User, badge: 0 },
   ];
 
   // Les classements sont publics : un visiteur anonyme y arrive sans le reste

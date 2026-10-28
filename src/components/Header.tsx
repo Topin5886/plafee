@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { MainMenu } from './MainMenu';
 import { AccountMenu } from '../features/account/components/AccountMenu';
 import { NotificationBell } from '../features/social/components/NotificationBell';
 import { SocialNav } from '../features/social/components/SocialNav';
@@ -85,6 +86,7 @@ export function Header() {
   return (
     <header className="site-header" ref={header}>
       <div className="container site-header-inner">
+        <MainMenu />
         <Link to="/" className="site-brand" aria-label="PLAFEE, accueil">
           <img src={`${BRAND}plafee-mark.svg`} alt="" className="site-brand-mark" width={23} height={40} />
           <img src={`${BRAND}plafee-wordmark.svg`} alt="" className="site-brand-word" width={116} height={20} />
