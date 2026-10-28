@@ -140,7 +140,7 @@ export function Home() {
                 {others.map((g) => (
                   <GameTile key={g.id} game={g} />
                 ))}
-                {/* La sixième borne : les tables des amis pour un joueur
+                {/* La dernière borne : les tables des amis pour un joueur
                     connecté, les classements pour un visiteur. */}
                 {status === 'signed-in' ? (
                   <Link to="/sessions" className="home-tile" data-kind="extra">

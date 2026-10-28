@@ -165,7 +165,7 @@ export const PERIOD_LABELS: Record<LeaderboardPeriod, string> = {
 export const PERIODS: LeaderboardPeriod[] = ['daily', 'weekly', 'monthly', 'alltime'];
 
 /** `null` : tous les jeux confondus. */
-export const LEADERBOARD_GAMES: (GameTypeId | null)[] = [null, 'scopa', 'uno', 'puissance4', 'puissance4-original', 'flip7'];
+export const LEADERBOARD_GAMES: (GameTypeId | null)[] = [null, 'scopa', 'uno', 'president', 'puissance4', 'puissance4-original', 'flip7'];
 
 /** Une ligne de `list_friend_sessions()`. */
 export interface FriendSession {

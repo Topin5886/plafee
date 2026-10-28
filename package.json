@@ -12,6 +12,7 @@
     "test:flip7": "node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/flip7/engine/rules.test.mts",
     "test:p4": "node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/puissance4/engine/rules.test.mts",
     "test:uno": "node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/uno/engine/rules.test.mts",
+    "test:president": "node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/president/engine/rules.test.mts && node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/president/engine/ai.test.mts && node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/president/net/seating.test.mts",
     "test:verite": "node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/verite/engine/rules.test.mts",
     "test:bots": "node --experimental-strip-types --import ./scripts/register-ts.mjs src/features/bots/bots.test.mts"
   },

@@ -39,6 +39,9 @@ jobs:
       - name: Test Roulette de Vérité rules
         run: npm run test:verite
 
+      - name: Test Président rules, AI and seating
+        run: npm run test:president
+
       - name: Lint
         run: npm run lint
 

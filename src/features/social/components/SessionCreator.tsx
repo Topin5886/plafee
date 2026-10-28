@@ -5,15 +5,9 @@ import { useAuth } from '../../account/useAuth';
 import { GAME_LABELS, type GameTypeId } from '../../account/types';
 import { MODES, MODE_ORDER, ORIGINAL_MODES } from '../../puissance4/engine/modes';
 import type { P4Mode } from '../../puissance4/engine/types';
-import { INVITABLE_GAMES, gameRoomPath, newRoomCode } from '../gameRooms';
+import { INVITABLE_GAMES, PLAYER_COUNTS, fewestPlayers, gameRoomPath, newRoomCode } from '../gameRooms';
 import * as api from '../api';
 import { Modal } from './Modal';
-
-/** Combien de joueurs chaque jeu accepte, tel que ses salons le proposent. */
-const COUNTS: Partial<Record<GameTypeId, number[]>> = {
-  uno: [2, 3, 4],
-  flip7: [2, 3, 4, 5],
-};
 
 /**
  * « Crée ta session » : jeu, visibilité, nombre de joueurs — puis la table.
@@ -49,7 +43,7 @@ function CreatorForm({ onClose, invitee }: { onClose: () => void; invitee: { id:
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const counts = COUNTS[game];
+  const counts = PLAYER_COUNTS[game];
   const p4Modes = game === 'puissance4' ? MODES : game === 'puissance4-original' ? ORIGINAL_MODES : null;
 
   async function submit(event: FormEvent) {
@@ -68,6 +62,8 @@ function CreatorForm({ onClose, invitee }: { onClose: () => void; invitee: { id:
           isHost: true,
           name: profile.username,
           visibility: isPublic ? 'public' : 'private',
+          // Le Président lit `maxPlayers` et garde ses autres réglages par
+          // défaut (« X ou rien » activé, 3 manches) : on les change au salon.
           maxPlayers: count,
           mode: game === 'flip7' ? 'online' : mode,
           ...(game === 'flip7' ? { difficulty: 'medium', ruleset: 'official' } : {}),
@@ -98,7 +94,7 @@ function CreatorForm({ onClose, invitee }: { onClose: () => void; invitee: { id:
               aria-pressed={game === g}
               onClick={() => {
                 setGame(g);
-                setCount(2);
+                setCount(fewestPlayers(g));
                 setMode('duel');
               }}
             >

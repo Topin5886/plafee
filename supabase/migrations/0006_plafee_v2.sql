@@ -297,19 +297,14 @@ on conflict (id) do update
 
 update public.achievements set is_limited = true where id = 'og_collector';
 
--- Les trophées maison de la V1 qui n'existent plus.
+-- Les trophées maison de la V1 qui n'existent plus. La V1 (0004) en posait
+-- 20 ; tous ont été repris ci-dessus, sauf « Timide ». On nomme les retirés
+-- plutôt que de garder une liste des conservés : une telle liste, figée ici,
+-- effacerait à chaque réexécution de 0006 les trophées maison des jeux arrivés
+-- après (le Président, 0015), et avec eux, par la cascade de
+-- `user_achievements`, tous les déblocages des joueurs.
 delete from public.achievements
-where metric = 'builtin' and id not in (
-  'first_win','warrior','champion','king','god',
-  'flip7_first','flip7_zero','flip7_cardiac','flip7_ace','flip7_master',
-  'scopa_first','scopa_scopeur','scopa_legend','scopa_master','scopa_god',
-  'uno_first','uno_strategist','uno_fast','uno_ace','uno_master',
-  'p4_geometer','p4_strategist','p4_classic','p4_forge','p4_master',
-  'verite_first','verite_honest','verite_valid20','verite_chef','verite_hard10','verite_valid100','verite_author',
-  'social_sociable','social_groupie','social_best','social_star','social_founder',
-  'first_game','shopper','five_stars','fees_1000','gold_week','streak','regular','daily7','all_games',
-  'veteran','fire_month','legend_1000','og_collector'
-);
+where metric = 'builtin' and id in ('flip7_shy');
 
 -- Le compte de trophées, par rareté : pour le classement et les profils.
 create or replace view public.achievement_counts

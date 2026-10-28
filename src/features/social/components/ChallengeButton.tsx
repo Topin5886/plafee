@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Swords } from 'lucide-react';
 import { useAuth } from '../../account/useAuth';
 import { GAME_LABELS } from '../../account/types';
-import { INVITABLE_GAMES, gameRoomPath, newRoomCode } from '../gameRooms';
+import { INVITABLE_GAMES, PLAYER_COUNTS, fewestPlayers, gameRoomPath, newRoomCode } from '../gameRooms';
 import * as api from '../api';
 import type { GameTypeId } from '../../account/types';
 
@@ -30,7 +30,11 @@ export function ChallengeButton({ friendId, friendName }: { friendId: string; fr
     try {
       await api.inviteToGame(friendId, game, code);
       panelRef.current?.hidePopover();
-      navigate(gameRoomPath(game, code), { state: { isHost: true, name: profile.username } });
+      // Les jeux à nombre de places réglable reçoivent leur minimum : à trois,
+      // un défi au Président attend un seul joueur de plus (un autre ami, invité
+      // depuis la table), pas deux. Les autres gardent le défaut de leur room.
+      const seats = PLAYER_COUNTS[game] ? { maxPlayers: fewestPlayers(game) } : {};
+      navigate(gameRoomPath(game, code), { state: { isHost: true, name: profile.username, ...seats } });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invitation impossible.');
       setBusy(false);

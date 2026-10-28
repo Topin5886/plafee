@@ -28,6 +28,8 @@ const Flip7Lobby = lazy(() => import('./features/flip7/Flip7Lobby').then(m => ({
 const Flip7Room = lazy(() => import('./features/flip7/Flip7Room').then(m => ({ default: m.Flip7Room })));
 const VeriteLobby = lazy(() => import('./features/verite/VeriteLobby').then(m => ({ default: m.VeriteLobby })));
 const VeriteRoom = lazy(() => import('./features/verite/VeriteRoom').then(m => ({ default: m.VeriteRoom })));
+const PresidentLobby = lazy(() => import('./features/president/PresidentLobby').then(m => ({ default: m.PresidentLobby })));
+const PresidentRoom = lazy(() => import('./features/president/PresidentRoom').then(m => ({ default: m.PresidentRoom })));
 // L'espace joueur n'intéresse que les joueurs connectés (et les curieux des
 // classements) : il se charge à la demande plutôt que d'alourdir la page
 // d'accueil et les tables de jeu.
@@ -81,6 +83,8 @@ function App() {
           <Route path="/flip7/:code" element={<Flip7Room />} />
           <Route path="/verite" element={<VeriteLobby />} />
           <Route path="/verite/:code" element={<VeriteRoom />} />
+          <Route path="/president" element={<PresidentLobby />} />
+          <Route path="/president/:code" element={<PresidentRoom />} />
           <Route path="/connexion" element={<LoginPage />} />
           <Route path="/inscription" element={<RegisterPage />} />
           <Route path="/compte" element={<ProfilePage />} />

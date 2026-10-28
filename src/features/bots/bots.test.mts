@@ -12,6 +12,9 @@ import * as p4 from '../puissance4/engine/rules.ts';
 import { p4Decide } from '../puissance4/engine/ai.ts';
 import { MODES, ORIGINAL_MODES } from '../puissance4/engine/modes.ts';
 import type { P4Mode } from '../puissance4/engine/types.ts';
+import * as president from '../president/engine/rules.ts';
+import { presidentDecide } from '../president/engine/ai.ts';
+import { presidentOutcome } from '../account/gameOutcomes.ts';
 
 let failures = 0;
 function check(label: string, cond: boolean, extra?: unknown) {
@@ -83,6 +86,31 @@ function playP4(levels: BotLevel[], mode: P4Mode, original: boolean) {
   return { stuck: s.phase === 'playing', errors, winner: s.winner?.team ?? -1 };
 }
 
+// --- Président ----------------------------------------------------------------------
+
+// L'hôte lance lui-même chaque manche (les bots ne le font jamais) : la
+// simulation le remplace. Les échanges de début de manche passent par l'IA.
+function playPresident(levels: BotLevel[], xOuRien: boolean, manches = 3) {
+  const bots = seats(levels);
+  let s = president.createInitialState('SIM', bots[0].id, bots.length);
+  s = president.applyAction(s, { type: 'SET_OPTIONS', maxPlayers: bots.length, xOuRien, manches }).state;
+  for (const b of bots) s = president.applyAction(s, { type: 'JOIN', playerId: b.id, name: b.name }).state;
+  s = president.applyAction(s, { type: 'START' }).state;
+  let errors = 0;
+  for (let step = 0; step < MAX_STEPS && s.phase !== 'over'; step++) {
+    if (s.phase === 'manche-end') {
+      s = president.applyAction(s, { type: 'NEXT_MANCHE' }).state;
+      continue;
+    }
+    const move = presidentDecide(s, bots);
+    if (!move) return { stuck: true, errors, winner: -1, state: s };
+    const r = president.applyAction(s, move.action);
+    if (r.error) errors++;
+    s = r.state;
+  }
+  return { stuck: s.phase !== 'over', errors, winner: s.winner ?? -1, state: s };
+}
+
 // --- Parties ------------------------------------------------------------------------
 
 type Result = { stuck: boolean; errors: number; winner: number };
@@ -117,6 +145,52 @@ series('Scopa duel', 60, (i) => playScopa(i % 2 ? ['easy', 'hard'] : ['hard', 'e
 console.log('UNO');
 for (const n of [2, 3, 4]) for (const stacking of [false, true]) series(`UNO à ${n}${stacking ? ', surenchère' : ''}`, 15, () => playUno(Array<BotLevel>(n).fill('normal'), stacking));
 series('UNO duel', 80, (i) => playUno(i % 2 ? ['easy', 'hard'] : ['hard', 'easy'], false), (i) => (i % 2 ? 1 : 0));
+
+console.log('Président');
+for (const n of [3, 4, 5, 6, 7]) for (const xOuRien of [true, false]) series(`Président à ${n}${xOuRien ? '' : ', sans X ou rien'}`, 6, () => playPresident(Array<BotLevel>(n).fill('normal'), xOuRien));
+series('Président, niveaux mêlés, 7 manches', 6, () => playPresident(['easy', 'normal', 'hard', 'normal'], true, 7));
+{
+  // À trois, le hasard donne un tiers des parties à chacun : le difficile, qui
+  // change de siège à chaque partie, doit faire nettement mieux face à deux faciles.
+  const n = 60;
+  let hardWins = 0;
+  for (let i = 0; i < n; i++) {
+    const levels: BotLevel[] = ['easy', 'easy', 'easy'];
+    levels[i % 3] = 'hard';
+    if (playPresident(levels, true).winner === i % 3) hardWins++;
+  }
+  console.log(`       difficile contre deux faciles : ${hardWins} victoires sur ${n}`);
+  check('Président : le difficile bat les faciles', hardWins > n / 2, { hardWins, n });
+}
+{
+  // Non-régression : des départs depuis l'écran de fin ne doivent pas changer
+  // la signature. Sinon les pairs restés à table recalculeraient une autre clé
+  // de session et enregistreraient la même partie une seconde fois (victoire,
+  // FEES et trophées doublés). Elle doit tenir, et changer à la revanche.
+  const over = playPresident(['normal', 'normal', 'normal', 'normal'], true).state;
+  check('Président : la partie de référence va jusqu’au bout', over.phase === 'over', { phase: over.phase });
+  const viewer = over.players[0].id;
+  const before = presidentOutcome(over, viewer, 'SIM')?.signature;
+  let left = president.applyAction(over, { type: 'LEAVE', playerId: over.players[3].id }).state;
+  left = president.applyAction(left, { type: 'LEAVE', playerId: over.players[2].id }).state;
+  const after = presidentOutcome(left, viewer, 'SIM')?.signature;
+  check('Président : la signature tient après des départs en fin de partie', before !== undefined && before === after, { before, after });
+
+  const replay = president.applyAction(over, { type: 'REMATCH' }).state;
+  check('Président : pas de résultat pendant la revanche', presidentOutcome(replay, viewer, 'SIM') === null);
+  let s = replay;
+  for (let step = 0; step < MAX_STEPS && s.phase !== 'over'; step++) {
+    if (s.phase === 'manche-end') {
+      s = president.applyAction(s, { type: 'NEXT_MANCHE' }).state;
+      continue;
+    }
+    const move = presidentDecide(s, seats(['normal', 'normal', 'normal', 'normal']));
+    if (!move) break;
+    s = president.applyAction(s, move.action).state;
+  }
+  const second = presidentOutcome(s, viewer, 'SIM')?.signature;
+  check('Président : la revanche a sa propre signature', second !== undefined && second !== before, { before, second });
+}
 
 console.log('Puissance 4');
 for (const original of [false, true]) {

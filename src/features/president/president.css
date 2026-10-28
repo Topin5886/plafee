@@ -1,0 +1,1710 @@
+/* ===================== Président ===============================
+   La borne PLAFEE — noir, néon vert — autour d'un vrai jeu de cartes :
+   les faces restent du papier crème, rouge et noir, comme sur une table de
+   cuisine ; le néon habille les dos, les sièges et ce qui se passe. Le doré
+   est la couleur du pouvoir (Président, les 2), le brun celle du bas de
+   la table. Les classes du salon (p4-lobby, p4-modal, uno-toggle…) sont
+   partagées ; seul ce qui est propre au Président vit ici, sous `pres-`.
+   ============================================================== */
+
+:root {
+  --pres-paper: #fbf9f3;
+  --pres-paper-edge: #cdc6b4;
+  --pres-red: #c8102e;
+  --pres-black: #16181d;
+  /* L'or du pouvoir est l'ambre de la charte : il suit les looks du site
+     (#ffc53d en Moderne, plus sombre en Blanc). */
+  --pres-gold: var(--amber);
+  --pres-gold-rgb: var(--amber-rgb);
+  --pres-gold-card: #d6a531;
+  --pres-silver: #cfd8e3;
+  --pres-bronze: #d08a52;
+  --pres-bronze-rgb: 208 138 82;
+  --pres-brown: #a0703c;
+  --pres-trick-w: clamp(56px, 9vw, 84px);
+}
+
+/* Sur fond blanc, l'or, l'argent et le bronze clairs ne se lisent plus
+   (1,4 à 2,7:1) : des teintes foncées, au moins 4,5:1 sur blanc, et pas de
+   halo lumineux. */
+html[data-look='blanc'] {
+  --pres-gold: #a16207;
+  --pres-gold-rgb: 161 98 7;
+  --pres-gold-card: #b8860b;
+  --pres-silver: #64748b;
+  --pres-bronze: #b45309;
+  --pres-bronze-rgb: 180 83 9;
+  --pres-brown: #7c4a1e;
+}
+
+html[data-look='blanc'] :is(.pres-seat-place, .pres-flash-title, .pres-step-crown) {
+  text-shadow: none;
+  filter: none;
+}
+
+html[data-look='blanc'] .pres-role[data-role='president'] { box-shadow: none; }
+
+/*
+ * La room tient en trois blocs serrés : la table, le dock (qui je suis, la
+ * consigne, les boutons) et la main. Tout est compté pour qu'un joueur voie
+ * ses cartes et « Poser » sans défiler, à 1280 × 900 comme sur un portable.
+ */
+.pres-room {
+  max-width: 1120px;
+  padding-top: 12px;
+  padding-bottom: 24px;
+}
+
+.pres-room .p4-room-topbar {
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Le titre et ses boutons sur une seule ligne : 40 px de gagnés. */
+.pres-room .p4-room-topbar > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.pres-room .p4-topbar-actions { margin-top: 0; }
+
+/* ---------- Cartes ---------- */
+
+.pres-card {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  border-radius: 7px;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.45));
+}
+
+.pres-card-bg {
+  fill: var(--pres-paper);
+  stroke: var(--pres-paper-edge);
+  stroke-width: 1.5;
+}
+
+/* Les 2 sont les atouts : un liseré doré les signale d'un coup d'œil dans la main. */
+.pres-card[data-rank='15'] .pres-card-bg {
+  stroke: var(--pres-gold-card);
+  stroke-width: 3;
+}
+
+.pres-card[data-color='red'] .pres-card-ink { fill: var(--pres-red); color: var(--pres-red); }
+.pres-card[data-color='black'] .pres-card-ink { fill: var(--pres-black); color: var(--pres-black); }
+
+.pres-card-index,
+.pres-fig-letter {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+}
+
+.pres-fig-letter { font-size: 19px; }
+
+.pres-fig-frame { stroke-width: 1.4; }
+.pres-card[data-color='red'] .pres-fig-frame { fill: #fcebec; stroke: var(--pres-red); }
+.pres-card[data-color='black'] .pres-fig-frame { fill: #eceef4; stroke: var(--pres-black); }
+
+.pres-fig-gold {
+  fill: var(--pres-gold-card);
+  stroke: rgb(0 0 0 / 0.35);
+  stroke-width: 0.8;
+}
+
+.pres-fig-split {
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+.pres-fig-medal {
+  fill: var(--pres-paper);
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.pres-ace-ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-dasharray: 2 3;
+  opacity: 0.4;
+}
+
+/* Le dos : la salle d'arcade, au néon du thème choisi. */
+.pres-back-bg {
+  fill: #0b0f0b;
+  stroke: rgb(var(--neon-rgb) / 0.55);
+  stroke-width: 1.5;
+}
+.pres-back-lattice { fill: rgb(var(--neon-rgb) / 0.17); }
+.pres-back-frame { fill: none; stroke: var(--neon); stroke-width: 1.6; }
+.pres-back-diamond { fill: rgb(var(--neon-rgb) / 0.08); stroke: var(--neon); stroke-width: 1.4; }
+.pres-back-crown { fill: var(--neon); }
+
+/* Les thèmes de cartes de la boutique : mêmes effets que sur les cartes des
+   autres jeux (styles/plafee-v2.css), repris ici pour les cartes dessinées. */
+html[data-cards='pixel'] .pres-card:not([data-seat-cards] *),
+html [data-seat-cards='pixel'] .pres-card {
+  border-radius: 0;
+  box-shadow: 0 0 0 2px #000, 0 0 0 4px var(--neon);
+  filter: contrast(1.08) saturate(1.2);
+}
+
+html[data-cards='holo'] .pres-card:not([data-seat-cards] *),
+html [data-seat-cards='holo'] .pres-card {
+  filter: saturate(1.25);
+  animation: plf-card-holo 3s linear infinite;
+}
+
+html[data-cards='neon'] .pres-card:not([data-seat-cards] *),
+html [data-seat-cards='neon'] .pres-card {
+  box-shadow: 0 0 0 2px #00ffff, 0 0 12px 2px rgb(255 0 255 / 0.75);
+}
+
+html[data-cards='gold'] .pres-card:not([data-seat-cards] *),
+html [data-seat-cards='gold'] .pres-card {
+  box-shadow: 0 0 0 2px #ffd700, 0 0 0 4px #7a5c00, 0 0 18px rgb(255 215 0 / 0.65);
+  filter: sepia(0.12) saturate(1.12) brightness(1.04);
+}
+
+html[data-fx='calm'][data-cards='holo'] .pres-card,
+html[data-fx='calm'] [data-seat-cards='holo'] .pres-card {
+  animation: none;
+  box-shadow: 0 0 0 2px #b04dff;
+}
+
+/* ---------- Pastilles de rôle ---------- */
+
+.pres-role {
+  --role-c: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px 2px;
+  border: 1px solid color-mix(in srgb, var(--role-c) 70%, transparent);
+  background: color-mix(in srgb, var(--role-c) 14%, transparent);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  color: var(--role-c);
+}
+
+.pres-role.is-compact {
+  padding: 3px;
+}
+
+.pres-role[data-role='president'] { --role-c: var(--pres-gold); box-shadow: 0 0 8px rgb(var(--pres-gold-rgb) / 0.45); }
+.pres-role[data-role='vice-president'] { --role-c: var(--pres-silver); }
+.pres-role[data-role='neutre'] { --role-c: var(--ink-3); }
+.pres-role[data-role='vice-trou'] { --role-c: var(--pres-bronze); }
+.pres-role[data-role='trou'] { --role-c: var(--pres-brown); }
+
+/* ---------- Table ---------- */
+
+/*
+ * La hauteur suit celle de la fenêtre : ce qui reste une fois comptés
+ * l'en-tête du site, la barre de la room, le dock et une rangée de cartes
+ * (≈ 380 px). Les planchers sont ceux où ni deux sièges ni un siège et le
+ * centre ne se touchent (simulés siège par sièges, de 761 à 1440 px de large,
+ * panneau d'échange compris).
+ */
+.pres-table {
+  position: relative;
+  height: clamp(370px, calc(100dvh - var(--header-h) - 380px), 450px);
+  margin: 0;
+  border: 2px solid rgb(var(--neon-rgb) / 0.22);
+  background:
+    radial-gradient(ellipse at 50% 70%, rgb(var(--neon-rgb) / 0.07), transparent 62%),
+    var(--well);
+}
+
+/* À 5 sièges et plus, l'arc descend sur les côtés : un peu plus de hauteur
+   pour que deux sièges voisins ne se chevauchent pas. */
+.pres-table:is([data-seats='5'], [data-seats='6'], [data-seats='7']) {
+  height: clamp(400px, calc(100dvh - var(--header-h) - 360px), 520px);
+}
+
+/* L'anneau où se posent les sièges : en retrait du bord, pour que les
+   sièges centrés sur ses lignes restent dans la table. */
+.pres-ring {
+  position: absolute;
+  inset: 56px 84px 64px;
+}
+
+.pres-seat {
+  position: absolute;
+  left: var(--seat-x);
+  top: var(--seat-y);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 138px;
+  padding: 6px 8px;
+  border: 2px solid rgb(var(--neon-rgb) / 0.2);
+  background: var(--panel);
+  transform: translate(-50%, -50%);
+  transition: border-color 0.25s ease-out, box-shadow 0.25s ease-out, opacity 0.25s ease-out;
+}
+
+.pres-seat[data-lead] { border-color: rgb(var(--cyan-rgb) / 0.55); }
+
+.pres-seat[data-active] {
+  border-color: var(--neon);
+  box-shadow: var(--neon-glow);
+  animation: pres-seat-pulse 1.6s ease-in-out infinite;
+}
+
+/* Sorti : le siège prend la teinte du rôle qu'il vient de gagner — l'or
+   reste au Président, un Vice-trou sorti n'a rien de doré. */
+.pres-seat[data-out] {
+  --out-c: var(--ink-3);
+  border-color: color-mix(in srgb, var(--out-c) 50%, transparent);
+  background: color-mix(in srgb, var(--panel) 90%, var(--out-c));
+}
+
+.pres-seat[data-out='president'] { --out-c: var(--pres-gold); }
+.pres-seat[data-out='vice-president'] { --out-c: var(--pres-silver); }
+.pres-seat[data-out='vice-trou'] { --out-c: var(--pres-bronze); }
+.pres-seat[data-out='trou'] { --out-c: var(--pres-brown); }
+
+.pres-seat[data-gone] { opacity: 0.45; }
+
+@keyframes pres-seat-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgb(var(--neon-rgb) / 0.45); }
+  50% { box-shadow: 0 0 18px rgb(var(--neon-rgb) / 0.8); }
+}
+
+.pres-seat-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.pres-seat-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 700;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.pres-seat-fan {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+}
+
+.pres-seat-back {
+  position: absolute;
+  width: 28px;
+  height: 39px;
+  transform-origin: 50% 90%;
+}
+
+/* Le compteur des sièges compacts (téléphone, écran bas), où l'éventail disparaît. */
+.pres-seat-n {
+  display: none;
+  flex: none;
+  justify-content: center;
+  min-width: 20px;
+  padding: 1px 4px;
+  font-family: var(--font-vcr);
+  font-size: 15px;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--bg);
+  background: var(--neon);
+}
+
+.pres-seat-count {
+  position: absolute;
+  right: 6px;
+  bottom: -2px;
+  z-index: 3;
+  min-width: 24px;
+  padding: 2px 5px;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  color: var(--bg);
+  background: var(--neon);
+  box-shadow: var(--neon-glow-sm);
+}
+
+.pres-seat-out {
+  --out-c: var(--ink-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+}
+
+/* Silkscreen plutôt que Press Start 2P : celle-ci ne dessine pas les
+   lettres accentuées, et une place peut s'écrire « 1re ». */
+.pres-seat-place {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--pres-gold);
+  text-shadow: 0 0 10px rgb(var(--pres-gold-rgb) / 0.6);
+}
+
+.pres-seat-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  min-height: 18px;
+  font-size: 11.5px;
+}
+
+/* Les points sont un afficheur : VT323, comme les scores du site. */
+.pres-seat-score {
+  white-space: nowrap;
+  font-family: var(--font-vcr);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink-2);
+}
+
+.pres-seat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pres-seat-tag[data-tone='turn'] { color: var(--neon); }
+.pres-seat-tag[data-tone='lead'] { color: var(--cyan); }
+.pres-seat-tag[data-tone='gone'] { color: var(--ink-3); }
+.pres-seat-tag[data-tone='pass'] { display: none; color: var(--ink-2); }
+
+/* « joue... » : les points s'écrivent un par un, comme sur un vieux terminal. */
+.pres-dots {
+  display: inline-block;
+  width: 3ch;
+  overflow: hidden;
+  vertical-align: bottom;
+  animation: pres-dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes pres-dots {
+  from { width: 0; }
+  to { width: 4ch; }
+}
+
+/* La bulle « Passe », accrochée au coin du siège. */
+.pres-seat-pass {
+  position: absolute;
+  top: -12px;
+  right: -10px;
+  z-index: 4;
+  padding: 4px 8px 3px;
+  border: 2px solid var(--ink-3);
+  background: var(--panel-2);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  pointer-events: none;
+}
+
+.pres-seat-pass::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: -7px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--ink-3);
+  border-bottom: 2px solid var(--ink-3);
+  background: var(--panel-2);
+  transform: rotate(45deg);
+}
+
+/* ---------- Centre : le pli ---------- */
+
+/*
+ * Le centre est calé en bas de la table, pas au milieu : les sièges du haut
+ * de l'arc ont toute la place au-dessus, et le pli n'a plus de bande vide
+ * dessous.
+ */
+.pres-center {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(360px, 44%);
+  transform: translateX(-50%);
+}
+
+/* Pendant l'échange, le panneau prend la place du pli, un peu plus large. */
+.pres-center[data-mode='panel'] {
+  width: min(420px, 46%);
+}
+
+.pres-center-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pres-chip {
+  padding: 3px 8px 2px;
+  border: 1px solid rgb(var(--neon-rgb) / 0.35);
+  background: rgb(var(--neon-rgb) / 0.06);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.pres-chip strong { color: var(--neon); }
+.pres-chip[data-tone='count'],
+.pres-chip[data-tone='min'] { color: var(--neon); border-color: var(--neon); }
+/* « X ou rien » : l'unique indicateur durable de la contrainte. */
+.pres-chip[data-tone='forced'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--bg);
+  border-color: var(--magenta);
+  background: var(--magenta);
+  box-shadow: 0 0 10px rgb(var(--magenta-rgb) / 0.6);
+}
+.pres-chip[data-tone='open'] { color: var(--cyan); border-color: rgb(var(--cyan-rgb) / 0.5); }
+
+.pres-trick {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  /* La place des poses plus anciennes, qui reculent vers le haut de la pile. */
+  height: calc(var(--pres-trick-w) * 1.4 + 36px);
+  padding-bottom: 4px;
+}
+
+.pres-trick-empty {
+  width: var(--pres-trick-w);
+  height: calc(var(--pres-trick-w) * 1.4);
+  border: 2px dashed rgb(var(--neon-rgb) / 0.3);
+  border-radius: 7px;
+}
+
+/* Une pose dans la pile : les plus anciennes reculent en haut à gauche et
+   s'assombrissent, la dernière est devant, bien droite ou presque. */
+.pres-play {
+  position: absolute;
+  z-index: calc(10 - var(--depth));
+  transform: translate(calc(var(--depth) * -20px), calc(var(--depth) * -9px)) rotate(var(--tilt));
+  filter: brightness(calc(1 - var(--depth) * 0.14));
+}
+
+.pres-play.is-top {
+  filter: drop-shadow(0 0 10px rgb(var(--neon-rgb) / 0.35));
+}
+
+.pres-play-cards {
+  display: flex;
+}
+
+.pres-play-card {
+  display: block;
+  width: var(--pres-trick-w);
+  height: calc(var(--pres-trick-w) * 1.4);
+}
+
+.pres-play-card + .pres-play-card {
+  margin-left: calc(var(--pres-trick-w) * -0.58);
+}
+
+.pres-trick-caption {
+  min-height: 20px;
+  margin: 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.pres-trick-caption strong { color: var(--ink); }
+
+.pres-center-exchange {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 10px;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+/* ---------- Consigne ---------- */
+
+.pres-hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+.pres-hint strong { color: var(--neon); }
+.pres-hint[data-mine] { color: var(--ink); }
+.pres-hint[data-mine] strong { text-shadow: var(--text-glow); }
+
+/* Pourquoi « Poser » reste grisé, dans la consigne même. */
+.pres-hint-why { color: var(--amber); }
+
+/* Les observateurs n'ont pas de dock : la consigne seule, sous la table. */
+.pres-hint-obs {
+  margin: 10px 0 0;
+  text-align: center;
+}
+
+/* ---------- Échange (au centre de la table) ---------- */
+
+.pres-exchange {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-height: 230px;
+  margin: 0;
+  padding: 10px 12px;
+  overflow-y: auto;
+  border: 2px solid rgb(var(--amber-rgb) / 0.6);
+  background: color-mix(in srgb, var(--panel) 92%, var(--amber));
+  box-shadow: 0 0 14px rgb(var(--amber-rgb) / 0.18);
+}
+
+.pres-exchange-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--amber);
+}
+
+.pres-exchange-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  color: var(--amber);
+  text-shadow: none;
+}
+
+.pres-exchange-close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.pres-exchange-close:hover { border-color: var(--amber); color: var(--amber); }
+
+.pres-exchange-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+.pres-exchange-step p { margin: 0; }
+
+.pres-exchange-tip {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.pres-exchange-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-basis: 100%;
+  color: var(--ink-3);
+}
+
+.pres-mini-cards {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.pres-mini-card {
+  display: block;
+  width: 32px;
+  height: 45px;
+}
+
+.pres-xlines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 6px 0 0;
+  border-top: 1px dashed rgb(var(--amber-rgb) / 0.35);
+  list-style: none;
+  font-size: 12.5px;
+}
+
+.pres-xlines li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  color: var(--ink-3);
+}
+
+.pres-xlines li[data-done] { color: var(--ink-2); }
+.pres-xlines li[data-done] > svg { color: var(--neon); }
+
+.pres-xline-names {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ---------- Le dock : moi, la consigne, mes boutons ---------- */
+
+.pres-dock {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 16px;
+  max-width: 960px;
+  margin: 8px auto 0;
+  padding: 6px 12px;
+  border: 2px solid rgb(var(--neon-rgb) / 0.2);
+  background: var(--panel);
+  transition: border-color 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+
+.pres-dock[data-active] {
+  border-color: var(--neon);
+  box-shadow: var(--neon-glow);
+}
+
+.pres-dock-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pres-dock-id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pres-dock-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.pres-me-name {
+  overflow: hidden;
+  max-width: 14ch;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  color: var(--ink);
+}
+
+.pres-me-stat {
+  font-family: var(--font-vcr);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--ink-2);
+}
+
+.pres-me-out {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.pres-dock-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.pres-action-btn {
+  gap: 8px;
+  min-width: 132px;
+  min-height: 46px;
+  padding: 10px 16px;
+}
+
+/* Le rappel de l'échange, sur une ligne au pied du dock, le temps qu'on le ferme. */
+.pres-recap {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  padding-top: 6px;
+  border-top: 1px dashed rgb(var(--amber-rgb) / 0.4);
+  font-size: 12.5px;
+  color: var(--amber);
+}
+
+.pres-recap-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+}
+
+.pres-recap .pres-mini-card {
+  width: 24px;
+  height: 34px;
+}
+
+.pres-recap .pres-exchange-close { margin-left: auto; }
+
+/* ---------- Main ---------- */
+
+/*
+ * La main est un conteneur : la largeur des cartes se calcule sur la sienne.
+ * `--groups` et `--extra` (posés par PresidentHand) disent combien de
+ * groupes et combien de cartes chevauchées à moitié il faut caser : au
+ * bureau, tout tient sur une ligne ; au pire, les groupes passent à la ligne.
+ */
+.pres-hand {
+  --groups: 8;
+  --extra: 4;
+  container-type: inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px 8px;
+  margin-top: 4px;
+  padding: 20px 4px 4px;
+}
+
+.pres-hand-group {
+  display: flex;
+}
+
+.pres-hand-card {
+  /* Une ligne : groupes × largeur + cartes en plus × moitié + 8 px entre
+     groupes (et 8 px de marge, sans quoi un arrondi renvoie le dernier
+     groupe à la ligne). */
+  --pres-card-w: clamp(
+    56px,
+    calc((100cqi - var(--groups) * 8px) / (var(--groups) + var(--extra) * 0.5)),
+    min(82px, 11.5dvh)
+  );
+  position: relative;
+  flex: none;
+  width: var(--pres-card-w);
+  height: calc(var(--pres-card-w) * 1.4);
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Dans un groupe, juste assez de chevauchement pour lire chaque index. */
+.pres-hand-card + .pres-hand-card {
+  margin-left: calc(var(--pres-card-w) * -0.5);
+}
+
+.pres-hand-card:disabled { cursor: default; }
+
+.pres-hand[data-enabled] .pres-hand-card:not(:disabled):hover .pres-card {
+  filter: drop-shadow(0 0 8px rgb(var(--neon-rgb) / 0.75));
+}
+
+.pres-hand-card[data-selected] .pres-card {
+  box-shadow: 0 0 0 3px var(--neon), 0 0 16px rgb(var(--neon-rgb) / 0.8);
+}
+
+/* Ce qui ne passe pas sur ce pli : présent, lisible, mais en retrait. */
+.pres-hand-card[data-dim] .pres-card {
+  filter: grayscale(0.7) brightness(0.5);
+}
+
+.pres-hand-card:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.pres-hand-received {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 8px rgb(var(--amber-rgb) / 0.8);
+}
+
+.pres-hand-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* ---------- Journal ---------- */
+
+.pres-log {
+  max-width: 640px;
+  margin: 18px auto 0;
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+}
+
+.pres-log summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.pres-log summary:hover,
+.pres-log[open] summary { color: var(--neon); }
+
+.pres-log summary:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+.pres-log ol {
+  max-height: 240px;
+  margin: 0;
+  padding: 4px 14px 12px 40px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* ---------- Fin de manche ---------- */
+
+.pres-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.25) 0 1px, transparent 1px 3px),
+    rgb(0 0 0 / 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.pres-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90dvh;
+  padding: 20px;
+  overflow-y: auto;
+  border: var(--frame);
+  background: var(--panel);
+  box-shadow: 0 0 24px rgb(var(--neon-rgb) / 0.45), 0 20px 50px rgb(0 0 0 / 0.6);
+}
+
+.pres-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--neon);
+}
+
+.pres-sheet-head h2 {
+  margin: 0;
+  font-size: 17px;
+  text-shadow: var(--text-glow);
+}
+
+.pres-sheet-head small {
+  font-size: 13px;
+  color: var(--ink-3);
+  text-shadow: none;
+}
+
+.pres-score-wrap {
+  overflow-x: auto;
+}
+
+.pres-score {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.pres-score th,
+.pres-score td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--line-2);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.pres-score thead th {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.pres-score tbody th {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pres-score tbody th em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.pres-score .is-num {
+  text-align: right;
+  white-space: nowrap;
+  font-family: var(--font-vcr);
+  font-weight: 400;
+  font-size: 18px;
+}
+
+.pres-score tr[data-self] { background: rgb(var(--neon-rgb) / 0.07); }
+
+.pres-score-place {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--neon);
+}
+
+.pres-score-rank {
+  margin-left: 6px;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.pres-sheet-next {
+  padding: 10px 12px;
+  border-left: 3px solid var(--amber);
+  background: rgb(var(--amber-rgb) / 0.07);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.pres-sheet-next-title {
+  margin: 0 0 6px;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.pres-sheet-next ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 16px;
+}
+
+.pres-sheet-next strong { color: var(--ink); }
+
+.pres-sheet-btn {
+  gap: 8px;
+  align-self: center;
+  min-height: 46px;
+}
+
+.pres-sheet-wait {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* ---------- Fin de partie ---------- */
+
+.pres-victory-card {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+
+.pres-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.pres-step {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 150px;
+  min-width: 0;
+}
+
+.pres-step-crown {
+  color: var(--pres-gold);
+  filter: drop-shadow(0 0 8px rgb(var(--pres-gold-rgb) / 0.8));
+}
+
+.pres-step-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: 700;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.pres-step-name em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.pres-step-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding-top: 10px;
+  border: 2px solid var(--step-c, var(--ink-3));
+  border-bottom: none;
+  background: color-mix(in srgb, var(--step-c, var(--ink-3)) 14%, transparent);
+}
+
+.pres-step[data-rank='0'] { --step-c: var(--pres-gold); }
+.pres-step[data-rank='1'] { --step-c: var(--pres-silver); }
+.pres-step[data-rank='2'] { --step-c: var(--pres-bronze); }
+.pres-step[data-rank='0'] .pres-step-block { height: 92px; box-shadow: 0 0 16px rgb(var(--pres-gold-rgb) / 0.45); }
+.pres-step[data-rank='1'] .pres-step-block { height: 68px; }
+.pres-step[data-rank='2'] .pres-step-block { height: 50px; }
+
+.pres-step-rank {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--step-c);
+}
+
+.pres-step-score {
+  font-family: var(--font-vcr);
+  font-size: 17px;
+  color: var(--ink-2);
+}
+
+.pres-rest {
+  width: 100%;
+  margin: 0;
+  padding-left: 26px;
+  font-size: 13px;
+  text-align: left;
+  color: var(--ink-2);
+}
+
+.pres-rest li > span {
+  display: inline-flex;
+  justify-content: space-between;
+  min-width: 45%;
+}
+
+.pres-rest li > span + span { justify-content: flex-end; font-family: var(--font-vcr); font-size: 16px; }
+.pres-rest em { font-style: normal; color: var(--ink-3); }
+.pres-rest li[data-self] { color: var(--neon); }
+
+.pres-my-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.pres-my-stats strong {
+  margin-left: 3px;
+  font-family: var(--font-pixel);
+  color: var(--ink);
+}
+
+/* ---------- Annonces ---------- */
+
+/* Posée sur la table (PresidentTable), au milieu : elle suit le pli quand
+   on fait défiler, et la feuille de fin de manche (fixe, plein écran) la
+   recouvre au lieu d'être traversée. */
+.pres-flash {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.pres-flash-band {
+  --tone: var(--neon);
+  --tone-rgb: var(--neon-rgb);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+  padding: 10px 20px 10px 14px;
+  overflow: hidden;
+  border: 2px solid var(--tone);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  box-shadow: 0 0 22px rgb(var(--tone-rgb) / 0.55), 0 12px 30px rgb(0 0 0 / 0.5);
+  transform-origin: center;
+}
+
+.pres-flash-band[data-tone='gold'] { --tone: var(--pres-gold); --tone-rgb: var(--pres-gold-rgb); }
+.pres-flash-band[data-tone='magenta'] { --tone: var(--magenta); --tone-rgb: var(--magenta-rgb); }
+.pres-flash-band[data-tone='cyan'] { --tone: var(--cyan); --tone-rgb: var(--cyan-rgb); }
+.pres-flash-band[data-tone='brown'] { --tone: var(--pres-bronze); --tone-rgb: var(--pres-bronze-rgb); }
+
+.pres-flash-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--tone);
+  color: var(--tone);
+  background: rgb(var(--tone-rgb) / 0.12);
+}
+
+.pres-flash-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* Silkscreen : « PRÉSIDENT ! » et « CARRÉ ! » ont des capitales accentuées
+   que Press Start 2P ne dessine pas. */
+.pres-flash-title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: clamp(16px, 4vw, 26px);
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  color: var(--tone);
+  text-shadow: 0 0 12px rgb(var(--tone-rgb) / 0.7);
+}
+
+.pres-flash-sub {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.pres-flash-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.22), transparent);
+}
+
+/* ---------- Salon ---------- */
+
+.pres-count-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+}
+
+.pres-mode-seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 4px 0 2px;
+}
+
+.pres-mode-seat {
+  --role-c: var(--ink-3);
+  width: 14px;
+  height: 14px;
+  background: var(--role-c);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--role-c) 60%, transparent);
+}
+
+.pres-mode-seat[data-role='president'] { --role-c: var(--pres-gold); }
+.pres-mode-seat[data-role='vice-president'] { --role-c: var(--pres-silver); }
+.pres-mode-seat[data-role='neutre'] { --role-c: var(--neon); }
+.pres-mode-seat[data-role='vice-trou'] { --role-c: var(--pres-bronze); }
+.pres-mode-seat[data-role='trou'] { --role-c: var(--pres-brown); }
+
+.pres-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 580px;
+  margin: 0 auto 34px;
+}
+
+.pres-toggle { background: var(--well); }
+
+.pres-manches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 14px 16px;
+  border: 2px solid rgb(var(--neon-rgb) / 0.25);
+  background: var(--well);
+}
+
+.pres-manches-label {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--neon);
+}
+
+.pres-manches-sub {
+  flex-basis: 100%;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.pres-seg {
+  display: inline-flex;
+  border: 2px solid rgb(var(--neon-rgb) / 0.4);
+}
+
+.pres-seg-btn {
+  min-width: 44px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color 0.15s ease-out, color 0.15s ease-out;
+}
+
+.pres-seg-btn + .pres-seg-btn { border-left: 2px solid rgb(var(--neon-rgb) / 0.4); }
+.pres-seg-btn:hover { color: var(--neon); }
+
+.pres-seg-btn.is-active {
+  color: var(--bg);
+  background: var(--neon);
+  box-shadow: var(--neon-glow-sm);
+}
+
+.pres-seg-btn:focus-visible,
+.pres-mini-toggle:focus-visible,
+.pres-exchange-close:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* La salle d'attente : options modifiables par l'hôte jusqu'au lancement. */
+.pres-waiting-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pres-mini-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 2px solid rgb(var(--neon-rgb) / 0.3);
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.pres-mini-toggle.is-on {
+  border-color: var(--magenta);
+  color: var(--ink);
+}
+
+.pres-mini-toggle.is-on svg { color: var(--magenta); }
+
+.pres-empty-seat {
+  border-style: dashed !important;
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.pres-waiting .p4-player-list em {
+  margin-left: auto;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--neon);
+}
+
+/* ---------- Règles ---------- */
+
+.pres-rules-ladder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 10px;
+}
+
+.pres-rules-card {
+  display: block;
+  width: 34px;
+  height: 48px;
+}
+
+/* ---------- Mouvement réduit, mode calme ---------- */
+
+/* Le mode calme coupe les animations permanentes, pas les retours
+   ponctuels : l'annonce reste, en simple fondu (voir PresidentFlash). */
+html[data-fx='calm'] :is(.pres-seat[data-active], .pres-dots) { animation: none; }
+html[data-fx='calm'] .pres-flash-sweep { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pres-seat[data-active],
+  .pres-dots,
+  html [data-seat-cards='holo'] .pres-card,
+  html[data-cards='holo'] .pres-card { animation: none; }
+  .pres-flash-sweep { display: none; }
+}
+
+/* ---------- Responsive ---------- */
+
+/*
+ * La grille compacte des sièges, au-dessus du pli : sous 760 px pour toutes
+ * les tables, et dès 1024 px à 6 et 7 sièges, où l'arc ne laisse plus assez
+ * de place entre deux voisins. Trois colonnes garanties (pas d'auto-fit qui
+ * retomberait à deux), des sièges sur deux lignes, sans l'éventail de dos.
+ */
+/*
+ * Écrans bas (portables, ≤ 760 px de haut) : les sièges perdent l'éventail
+ * de dos et tiennent sur deux lignes, le pli rapetisse avec la hauteur, et
+ * la table descend jusqu'à 300 px — de quoi garder le dock et la main à
+ * l'écran. Planchers simulés comme ceux du bureau.
+ */
+@media (max-height: 760px) and (min-width: 761px) {
+  :root { --pres-trick-w: clamp(56px, 8.5dvh, 84px); }
+
+  .pres-table { height: clamp(300px, calc(100dvh - var(--header-h) - 350px), 450px); }
+  .pres-table:is([data-seats='5'], [data-seats='6'], [data-seats='7']) {
+    height: clamp(330px, calc(100dvh - var(--header-h) - 330px), 520px);
+  }
+
+  .pres-ring { inset: 34px 84px 40px; }
+  .pres-seat { gap: 3px; padding: 5px 8px; }
+  .pres-seat-fan,
+  .pres-seat-pass { display: none; }
+  .pres-seat-n,
+  .pres-seat-tag[data-tone='pass'] { display: inline-flex; }
+  .pres-seat-out { flex-direction: row; height: auto; gap: 6px; }
+  .pres-seat-out .pres-role { padding: 3px; }
+  .pres-seat-out .pres-role > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .pres-seat[data-out] .pres-seat-foot { display: none; }
+  .pres-exchange { max-height: 200px; }
+}
+
+@media (max-width: 1024px) {
+  .pres-table:is([data-seats='6'], [data-seats='7']) {
+    height: auto;
+    padding: 10px;
+  }
+
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-ring {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-seat {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    min-width: 0;
+    gap: 3px;
+    padding: 5px 8px;
+    transform: none;
+  }
+
+  .pres-table:is([data-seats='6'], [data-seats='7']) :is(.pres-seat-fan, .pres-seat-pass) { display: none; }
+  .pres-table:is([data-seats='6'], [data-seats='7']) :is(.pres-seat-n, .pres-seat-tag[data-tone='pass']) { display: inline-flex; }
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-seat-out { flex-direction: row; height: auto; gap: 6px; }
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-seat[data-out] .pres-seat-foot { display: none; }
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-seat-out .pres-role { padding: 3px; }
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-seat-out .pres-role > span {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-center {
+    position: static;
+    width: min(420px, 100%);
+    margin: 12px auto 0;
+    transform: none;
+  }
+}
+
+@media (max-width: 760px) {
+  :root { --pres-trick-w: clamp(48px, 14vw, 64px); }
+
+  .pres-room {
+    padding-top: 8px;
+    padding-bottom: 20px;
+  }
+
+  /* Les boutons de la barre en icônes seules : le texte reste le nom
+     accessible, il ne prend juste plus de place. « Quitter » se range au
+     bout de leur ligne au lieu d'en ouvrir une troisième. */
+  .pres-room .p4-chip-btn {
+    gap: 0;
+    padding: 9px 11px;
+    font-size: 0;
+  }
+
+  .pres-room .p4-room-topbar { position: relative; }
+
+  .pres-room .p4-room-topbar > .p4-back-link {
+    position: absolute;
+    right: 0;
+    bottom: 12px;
+  }
+
+  .pres-table,
+  .pres-table:is([data-seats='5'], [data-seats='6'], [data-seats='7']) {
+    height: auto;
+    padding: 8px;
+  }
+
+  .pres-ring,
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-ring {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .pres-table[data-seats='2'] .pres-ring { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .pres-seat {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    min-width: 0;
+    gap: 3px;
+    padding: 5px;
+    transform: none;
+  }
+
+  .pres-seat-head { gap: 4px; }
+  .pres-seat-name { font-size: 12px; }
+
+  /* L'éventail est décoratif : sur téléphone, le compteur passe dans
+     l'en-tête et la passe au pied du siège. L'avatar laisse la place au nom. */
+  .pres-seat-fan,
+  .pres-seat-pass,
+  .pres-seat-head > :first-child { display: none; }
+
+  .pres-seat-n,
+  .pres-seat-tag[data-tone='pass'] { display: inline-flex; }
+
+  .pres-seat-out {
+    flex-direction: row;
+    height: auto;
+    gap: 6px;
+  }
+
+  .pres-seat-place { font-size: 12px; }
+  /* Rôle gagné en icône seule (le nom reste lu par les lecteurs d'écran). */
+  .pres-seat-out .pres-role { padding: 3px; }
+  .pres-seat-out .pres-role > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .pres-seat[data-out] .pres-seat-foot { display: none; }
+
+  .pres-seat-foot { flex-wrap: wrap; gap: 0 4px; min-height: 16px; font-size: 11px; }
+  .pres-seat-tag { font-size: 10px; }
+  .pres-seat-score { font-size: 15px; }
+
+  .pres-center,
+  .pres-center[data-mode='panel'],
+  .pres-table:is([data-seats='6'], [data-seats='7']) .pres-center {
+    position: static;
+    width: 100%;
+    margin-top: 10px;
+    transform: none;
+  }
+
+  .pres-exchange { max-height: none; }
+
+  /* Le dock sur une colonne : qui je suis, la consigne, les boutons en pleine largeur. */
+  .pres-dock {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding: 6px 8px 8px;
+  }
+
+  /* Sur téléphone, l'avatar cède sa place : nom, rôle et compteurs tiennent sur une ligne. */
+  .pres-dock-me > :first-child { display: none; }
+
+  .pres-dock-id {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 10px;
+  }
+
+  .pres-dock-actions .pres-action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* Deux rangées visées (avec du jeu : les groupes n'ont pas tous la même
+     largeur), et jamais sous 54 px : l'index doit se lire. */
+  .pres-hand {
+    gap: 8px 8px;
+    padding-top: 18px;
+  }
+
+  .pres-hand-card {
+    --pres-card-w: clamp(
+      54px,
+      calc((160cqi - var(--groups) * 8px) / (var(--groups) + var(--extra) * 0.58)),
+      68px
+    );
+  }
+
+  /* Petites cartes : un peu moins de chevauchement, pour garder l'index entier. */
+  .pres-hand-card + .pres-hand-card {
+    margin-left: calc(var(--pres-card-w) * -0.42);
+  }
+
+  .pres-sheet { padding: 14px; }
+
+  .pres-score th,
+  .pres-score td { padding: 7px 5px; }
+
+  .pres-flash-band { padding: 8px 14px 8px 10px; gap: 10px; }
+  .pres-flash-icon { width: 32px; height: 32px; }
+}
+
+@media (max-width: 400px) {
+  /* Le nom du rôle reste lu par les lecteurs d'écran, seule l'icône se voit. */
+  .pres-score .pres-role span:not(.sr-only) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .pres-score .pres-role { padding: 3px; }
+  .pres-podium { gap: 6px; }
+}

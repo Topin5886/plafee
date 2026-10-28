@@ -1,5 +1,5 @@
 /** Les identifiants de jeu tels qu'ils vivent dans `game_types` en base. */
-export type GameTypeId = 'flip7' | 'scopa' | 'uno' | 'puissance4' | 'puissance4-original' | 'verite';
+export type GameTypeId = 'flip7' | 'scopa' | 'uno' | 'puissance4' | 'puissance4-original' | 'verite' | 'president';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
@@ -83,4 +83,5 @@ export const GAME_LABELS: Record<GameTypeId, string> = {
   puissance4: 'P4 Forge',
   'puissance4-original': 'P4 Classic',
   verite: 'Roulette de Vérité',
+  president: 'Président',
 };

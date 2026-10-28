@@ -134,6 +134,54 @@
   font-size: clamp(10px, calc(var(--gt-size) * 0.42), 14px);
 }
 
+/* Le Président : l'or du trône, en Silkscreen pour garder le É et le Ô
+   entiers. Une couronne de pixels est posée de travers sur le P ; la lueur
+   respire lentement, comme un palais allumé la nuit. */
+.gt[data-game='president'] {
+  --gt-scale: 1.3;
+  --gt-glow: var(--amber);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+}
+
+.gt[data-game='president'] .gt-word { animation: gt-throne 4.2s ease-in-out infinite; }
+.gt[data-game='president'] .gt-orn { opacity: 0.6; }
+.gt[data-game='president'] .gt-part { position: relative; }
+
+/* La couronne : 7 × 5 pixels, peinte à la couleur du texte (le masque ne
+   garde que la forme), donc dorée ici et sobre dans les thèmes sans néon. */
+.gt[data-game='president'] .gt-part::before {
+  content: '';
+  position: absolute;
+  left: -0.18em;
+  top: -0.5em;
+  width: 0.7em;
+  height: 0.5em;
+  background: currentColor;
+  -webkit-mask: var(--gt-crown) center / contain no-repeat;
+  mask: var(--gt-crown) center / contain no-repeat;
+  transform: rotate(-16deg);
+  transform-origin: 70% 100%;
+  filter: drop-shadow(0 0 3px rgb(var(--amber-rgb) / 0.7));
+  transition: transform 0.3s ease-out;
+  --gt-crown: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v2H0zM3 0h1v2H3zM6 0h1v2H6zM1 1h1v1H1zM5 1h1v1H5zM0 2h7v3H0z'/%3E%3C/svg%3E");
+}
+
+.gt[data-game='president'] .gt-motto {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: clamp(10px, calc(var(--gt-size) * 0.42), 14px);
+  color: rgb(var(--amber-rgb) / 0.8);
+  text-shadow: 0 0 6px rgb(var(--amber-rgb) / 0.45);
+}
+
+@keyframes gt-throne {
+  0%, 100% { text-shadow: 0 0 8px rgb(var(--amber-rgb) / 0.55); }
+  50% { text-shadow: 0 0 6px var(--amber), 0 0 18px rgb(var(--amber-rgb) / 0.55); }
+}
+
 /* --- Survol : la lueur monte, le nom grossit ---------------------------------- */
 
 :is(a, button):hover .gt .gt-word,
@@ -148,11 +196,28 @@
   animation-duration: 1.2s;
 }
 
-html[data-fx='calm'] .gt[data-game='uno'] .gt-word { animation: none; }
+/* Les thèmes sobres coupent tous les halos : celui de la couronne aussi. */
+html:is([data-look='noir'], [data-look='blanc']) .gt[data-game='president'] .gt-part::before { filter: none; }
+
+/* Élu : la couronne se redresse et saute d'un cran sur la tête du P. */
+:is(a, button):hover .gt[data-game='president'] .gt-word,
+.gt[data-game='president']:hover .gt-word {
+  animation: none;
+  text-shadow: 0 0 5px var(--amber), 0 0 16px var(--amber), 0 0 30px rgb(var(--amber-rgb) / 0.7);
+}
+
+:is(a, button):hover .gt[data-game='president'] .gt-part::before,
+.gt[data-game='president']:hover .gt-part::before {
+  transform: translateY(-0.14em) rotate(-4deg);
+}
+
+html[data-fx='calm'] .gt[data-game='uno'] .gt-word,
+html[data-fx='calm'] .gt[data-game='president'] .gt-word { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .gt-word { transition: none; }
   .gt .gt-word { animation: none !important; transform: none !important; }
+  .gt[data-game='president'] .gt-part::before { transition: none; transform: rotate(-16deg) !important; }
 }
 
 /* --- Contextes -------------------------------------------------------------- */
@@ -168,6 +233,8 @@ html[data-fx='calm'] .gt[data-game='uno'] .gt-word { animation: none; }
 /* Dans une liste, ou dans un cadre étroit, les ornements cèdent la place au
    nom : ils ne doivent jamais passer seuls à la ligne. */
 .gt[data-size='sm'] .gt-orn { display: none; }
+/* Même chose pour la couronne : en petit, elle mordrait sur la ligne du dessus. */
+.gt[data-size='sm'][data-game='president'] .gt-part::before { display: none; }
 
 @container (max-width: 250px) {
   .gt .gt-orn { display: none; }

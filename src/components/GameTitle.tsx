@@ -27,6 +27,8 @@ const GAME_TITLES: Record<GameTypeId, TitleSpec> = {
   uno: { label: 'UNO', before: '***', after: '***', parts: ['UNO'], motto: 'CHAOS MODE' },
   flip7: { label: 'Flip 7', parts: ['[FLIP.7]'], motto: 'STOP OR CONTINUE' },
   verite: { label: 'Roulette de Vérité', parts: ['ROULETTE', 'DE', 'VÉRITÉ'], motto: 'VÉRITÉ OU MYTHO ?' },
+  // La couronne posée de travers sur le P est dessinée en CSS (gameTitle.css).
+  president: { label: 'Président', before: '-=', after: '=-', parts: ['PRÉSIDENT'], motto: 'LE TRÔNE OU LE TROU' },
 };
 
 interface Props {

@@ -14,6 +14,7 @@ déjà en place suivent.)
 - **Puissance 4** — le classique, mais avec des pouvoirs. De 2 à 4 joueurs : duel, chacun pour soi à 3 ou 4, ou 2 v 2 en équipes (l'alignement gagnant peut mélanger les jetons des deux coéquipiers). Personne ne *choisit* ses pouvoirs : chaque joueur reçoit une réserve de jetons pour la partie, dont une minorité tirée au sort est chargée d'un pouvoir — Traversée, Destruction, Inversion de gravité, Double-tour ou Blocage de colonne. Tu joues ta colonne normalement ; si ce jeton-là était chargé, l'effet part à l'impact. Même système de rooms que la Scopa.
 - **Puissance 4 Original** — la même chose, sans aucun pouvoir : le Puissance 4 classique sur une grille 7 × 6, dans les quatre mêmes formats.
 - **UNO** — le jeu de cartes, de 2 à 4 joueurs, avec deux ajouts : deux **cartes mystère** mélangées à la pioche, qui déclenchent un effet-surprise dès qu'on les tire (aucune en duel — sans public, la surprise ne vaut rien), et une option de **surenchère des +** que l'hôte active avant la partie, où un +2 peut être relancé jusqu'à ce que quelqu'un encaisse la pile. Les boutons **UNO** et **Contre UNO** sont à double tranchant : oublier d'annoncer coûte deux cartes, dénoncer à tort aussi.
+- **Président** — le jeu de cartes traditionnel, de 3 à 7 joueurs, avec les 52 cartes toutes distribuées. Du 3 au 2, le **2** est la plus forte ; les couleurs ne comptent pas. Celui qui ouvre le pli pose 1 à 4 cartes de même valeur, les suivants en posent autant d'une valeur égale ou supérieure, ou passent (et peuvent revenir dans le pli). Un **2** ou un **carré** coupe net : le pli se ferme et son auteur rouvre. Option **« X ou rien »** (active par défaut) : rejouer la même valeur que la pose précédente oblige le suivant à la suivre, ou à passer. L'ordre de sortie fait les rôles — Président, Vice-président, Neutres, Vice-trou, **Trou du cul** — et la manche suivante commence par l'échange : le Trou du cul donne d'office ses deux meilleures cartes au Président, qui lui en rend deux de son choix (une seule entre Vice-trou et Vice-président, dès 4 joueurs). Partie en 3, 5 ou 7 manches, au cumul des points ; contre des bots ou entre amis, observateurs compris. Moteur : [src/features/president/engine/](src/features/president/engine/), tests : `npm run test:president`, schéma : [0015_president.sql](supabase/migrations/0015_president.sql).
 - **Roulette de Vérité** — action ou vérité façon arcade, de 2 à 6 joueurs + 1 **chef du jeu** qui ne joue pas. La bouteille tourne et désigne un joueur, une carte se retourne et la question s'écrit lettre par lettre ; il répond, le chef tranche **✓ valide** (+1 point) ou **✗ invalide**. Trois thèmes : CLEAN, NORMAL (du fun et une question qui pique toutes les quatre manches) et HARD (18+, confirmation demandée). Questions perso **privées** (cette partie seulement, jamais écrites en base) ou **publiques** (pool partagé, compte requis, masquées au troisième signalement). 10, 20 manches ou partie libre ; on peut rejoindre en cours de route. Moteur : [src/features/verite/engine/](src/features/verite/engine/), tests : `npm run test:verite`, schéma : [0005_roulette_verite.sql](supabase/migrations/0005_roulette_verite.sql).
 
 ## Identité : la charte PLAFEE
@@ -33,6 +34,7 @@ au symbole et au lettrage animés de l'écran de démarrage.
 | Noir salle / borne | `#0D0D0D` / `#1A1A1A` | fond de page, fond des cartes |
 | Cyan | `#00FFFF` | observer, Flip 7, contour de focus |
 | Magenta | `#FF00FF` | alertes, badge « hot », UNO |
+| Or | `#FFC53D` | le Président, la couronne et le trône |
 
 Le vert est celui de la charte, mesuré sur les fichiers de marque — un vert fluo
 légèrement plus tendre que le `#00FF00` pur, pour que l'interface et le logo
@@ -43,7 +45,7 @@ soient exactement de la même couleur. Il ne vit qu'à un seul endroit :
 
 | Police | Rôle |
 | --- | --- |
-| Silkscreen 700 | l'interface : titres, boutons, onglets, étiquettes (elle dessine les capitales accentuées en entier, ce que Press Start 2P ne fait pas) |
+| Silkscreen 700 | l'interface : titres, boutons, onglets, étiquettes, et les noms à accents (VÉRITÉ, PRÉSIDENT) : elle dessine les capitales accentuées en entier, ce que Press Start 2P ne fait pas |
 | Press Start 2P | l'arcade pure, sans accents : titres SCOPA et UNO, PRESS START, devises |
 | VT323 | les afficheurs : scores, points, codes de room |
 | JetBrains Mono | le texte courant |
@@ -78,9 +80,10 @@ la même chose sans réglage.
 **Noms des jeux** : `<GameTitle game="scopa" />`
 ([src/components/GameTitle.tsx](src/components/GameTitle.tsx)) affiche le nom d'un
 jeu dans sa typographie de borne (`>> SCOPA <<`, `[P4] FORGE`, `[P4] CLASSIC`,
-`*** UNO ***` qui cycle vert → cyan → magenta, `[FLIP.7]` en cyan), avec sa
-devise en option (CARD BATTLE, POWER MODE, PURE MODE, CHAOS MODE, STOP OR
-CONTINUE). On s'en sert sur les bornes de l'accueil, en tête des salons et des
+`*** UNO ***` qui cycle vert → cyan → magenta, `[FLIP.7]` en cyan,
+`-= PRÉSIDENT =-` en or, une couronne de pixels posée de travers sur le P, qui
+se redresse au survol), avec sa devise en option (CARD BATTLE, POWER MODE, PURE
+MODE, CHAOS MODE, STOP OR CONTINUE, VÉRITÉ OU MYTHO ?, LE TRÔNE OU LE TROU). On s'en sert sur les bornes de l'accueil, en tête des salons et des
 parties, et dans les listes.
 
 **Installable** : `manifest.webmanifest` déclare PLAFEE en plein écran avec ses
@@ -124,6 +127,12 @@ Le moteur de règles du Puissance 4 (gravité, pouvoirs, détection d'alignement
 
 ```bash
 npm run test:p4
+```
+
+Le Président a les siens — donne, poses légales, « X ou rien », fermeture du pli (passes, 2, carré), sorties et rôles de 3 à 7 joueurs, échanges de début de manche, déconnexions, fin de partie et départage — suivis de ceux de son IA : les trois niveaux, les échanges, des parties simulées de 3 à 7 joueurs où le difficile doit battre le facile, et l'arrivée des observateurs sur les sièges libérés (compte et trophées propres, revanche rendue possible) :
+
+```bash
+npm run test:president
 ```
 
 Aucun framework de test : Node exécute le TypeScript directement, [scripts/register-ts.mjs](scripts/register-ts.mjs) se contentant de reproduire la résolution d'imports que Vite applique déjà.
@@ -329,13 +338,21 @@ Schéma : [supabase/migrations/0006_plafee_v2.sql](supabase/migrations/0006_plaf
 écriture uniquement par des fonctions en base. Code client :
 [src/features/plafee/](src/features/plafee/).
 
-**Trophées.** 50 trophées maison (catégories Victoires, Flip 7, Scopa, UNO,
-Puissance 4, Roulette de Vérité, Sociabilité, Défis) et six raretés : bronze,
+**Trophées.** 57 trophées maison (catégories Victoires, Flip 7, Scopa, UNO,
+Puissance 4, Roulette de Vérité, Président, Sociabilité, Défis) et six raretés : bronze,
 argent, or, platine, divin, OG. Tout se calcule en base après chaque partie
 (`_achievement_progress`) ; les compteurs propres à un jeu (arrêts à 0 point,
-scopas d'affilée, réponses validées, séries par difficulté…) viennent du
-client, bornés, comme avant. L'OG demande 50 trophées : les 49 autres plus au
-moins un trophée d'événement ou créé par un admin. Hall des trophées :
+scopas d'affilée, réponses validées, séries par difficulté, carrés et plis
+coupés au 2 du Président…) viennent du client, bornés, comme avant. L'OG demande
+50 trophées, tous les autres comptent. Les sept du Président (Premier mandat,
+Coupe-feu, Carré magique, Réélu, Du trou au trône, Chef d'État, Président à vie)
+et Touche-à-tout à sept jeux viennent de
+[0015](supabase/migrations/0015_president.sql). Les migrations se rejouent
+dans l'ordre : réexécuter seule une migration plus ancienne qui redéfinit le
+calcul des trophées (0004, 0006, 0014) remet sa version d'avant, et il faut
+rejouer les suivantes derrière. La purge de 0006 ne vise que les trophées
+retirés de la V1, nommés un à un : elle n'efface plus ceux des jeux ajoutés
+après, ni leurs déblocages. Hall des trophées :
 `/trophees` (top 10, raretés, déblocages récents, richesse).
 
 **FEES.** La monnaie : gains par victoire (réglables par jeu), chef d'une
@@ -379,7 +396,7 @@ badges : tout se modifie dans un brouillon, puis part en un seul envoi
 comptent dans les totaux et les trophées, pas dans les classements de la
 semaine ni dans l'historique des parties.
 
-**Bots** : Scopa, UNO, Puissance 4 (Forge et Classic) et Flip 7 se jouent
+**Bots** : Scopa, UNO, Président, Puissance 4 (Forge et Classic) et Flip 7 se jouent
 contre des bots — Facile, Normal, Difficile, ou Aléatoire (chaque bot tire son
 niveau en secret). Aucune connexion : le navigateur tient la table comme l'hôte
 d'une partie en ligne, avec le même moteur, et joue pour les bots
@@ -410,6 +427,18 @@ qu'elle apparaisse sur l'accueil, ajoute-la au tableau `GAMES` de
 [src/features/games.ts](src/features/games.ts), à `GAME_TITLES` de
 `GameTitle.tsx` (et son style dans `gameTitle.css` : sa police pixel, sa couleur
 et sa devise), et à `game_types` en base si ses parties doivent compter.
+
+Un jeu complet, comme le Président, touche aussi : `GameTypeId` et
+`GAME_LABELS` ([src/features/account/types.ts](src/features/account/types.ts) —
+le compilateur signale alors chaque `Record` à compléter), ses routes dans
+`App.tsx`, son issue dans `gameOutcomes.ts`, `INVITABLE_GAMES` (défis et
+sessions), `LEADERBOARD_GAMES`, les nombres de joueurs de `SessionCreator.tsx`,
+la catégorie de trophées (`achievements/api.ts`, et ses icônes dans
+`achievements/icons.ts`), et une migration : `game_types`, le gain
+`victory_<jeu>` de `fees_price_config`, la contrainte
+`achievements_category_check`, ses trophées dans `_achievement_progress`, et
+ses compteurs dans la liste que `record_game_result` accepte (sinon il les
+jette).
 
 ## Déploiement
 

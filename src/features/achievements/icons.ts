@@ -16,6 +16,7 @@ import {
   Flame,
   Footprints,
   Gem,
+  Grid2x2,
   Grid3x3,
   Hammer,
   Hand,
@@ -24,12 +25,15 @@ import {
   HeartPulse,
   Infinity as InfinityIcon,
   Joystick,
+  Landmark,
   Layers,
   Medal,
   MessageCircle,
   MessagesSquare,
   PartyPopper,
   PiggyBank,
+  Rocket,
+  Scissors,
   Shield,
   ShieldCheck,
   ShoppingBag,
@@ -45,6 +49,7 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  Vote,
   Wine,
   Zap,
   type LucideIcon,
@@ -58,9 +63,10 @@ import {
  */
 const ICONS: Record<string, LucideIcon> = {
   Award, BadgeCheck, Brain, Building2, Cake, CalendarCheck, Castle, ChefHat, Coffee, Coins, Crown, Dices, Disc,
-  Feather, Flame, Footprints, Gem, Grid3x3, Hammer, Hand, Heart, HeartHandshake, HeartPulse, Infinity: InfinityIcon,
-  Joystick, Layers, Medal, MessageCircle, MessagesSquare, PartyPopper, PiggyBank, Shield, ShieldCheck, ShoppingBag,
-  Shuffle, Spade, Sparkle, Sparkles, Star, Stars, Sun, Swords, Tornado, TrendingUp, Trophy, Users, Wine, Zap,
+  Feather, Flame, Footprints, Gem, Grid2x2, Grid3x3, Hammer, Hand, Heart, HeartHandshake, HeartPulse,
+  Infinity: InfinityIcon, Joystick, Landmark, Layers, Medal, MessageCircle, MessagesSquare, PartyPopper, PiggyBank,
+  Rocket, Scissors, Shield, ShieldCheck, ShoppingBag, Shuffle, Spade, Sparkle, Sparkles, Star, Stars, Sun, Swords,
+  Tornado, TrendingUp, Trophy, Users, Vote, Wine, Zap,
 };
 
 export const ICON_NAMES = Object.keys(ICONS).sort();

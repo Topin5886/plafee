@@ -3,13 +3,14 @@ import type { UnoState } from '../uno/engine/types';
 import type { P4State } from '../puissance4/engine/types';
 import type { PublicState as Flip7State } from '../flip7/engine/types';
 import type { VeriteState } from '../verite/engine/types';
+import type { PresidentState } from '../president/engine/types';
 import { isBotId } from '../bots/bots';
 import type { GameOutcome } from './recordGame';
 
 /*
  * Traduire la fin d'une partie en ligne de classement.
  *
- * Les quatre dérivations vivent ensemble parce qu'elles partagent un contrat
+ * Les dérivations vivent ensemble parce qu'elles partagent un contrat
  * qu'il vaut mieux relire d'un seul coup d'oeil que retrouver éparpillé :
  *
  *   1. Rendre `null` tant que la partie n'est pas finie.
@@ -174,6 +175,48 @@ export function veriteOutcome(state: VeriteState | null, selfId: string | null, 
     chef: chef?.userId ?? null,
     // La Roulette ne se joue pas contre des bots.
     vsBots: false,
+  };
+}
+
+/**
+ * Le Président : le plus gros score cumulé sur les manches l'emporte. Le
+ * moteur départage déjà les égalités (meilleure place à la dernière manche) et
+ * tient lui-même les compteurs des trophées, identiques chez tous les pairs :
+ * pas besoin de les recompter ici. Une partie arrêtée faute de joueurs
+ * connectés finit aussi en `over`, avec un gagnant au score : elle compte.
+ */
+export function presidentOutcome(
+  state: PresidentState | null,
+  selfId: string | null,
+  roomCode: string,
+): GameOutcome | null {
+  if (!state || state.phase !== 'over' || state.winner === null || !selfId) return null;
+
+  const seat = state.players.findIndex((p) => p.id === selfId);
+  if (seat === -1) return null;
+  const me = state.players[seat];
+
+  return {
+    gameType: 'president',
+    roomCode,
+    playerCount: state.players.length,
+    won: state.winner === seat,
+    score: me.score,
+    // `lastEvent.seq` seul, sans `log.length` comme UNO. Un départ depuis
+    // l'écran de fin n'écrit plus rien au journal, mais la signature ne doit pas
+    // dépendre d'un détail d'affichage : si elle changeait sous les pieds des
+    // pairs restés à table, la même partie serait enregistrée une seconde fois,
+    // victoire et FEES compris. `seq` ne bouge plus une fois la partie en `over`
+    // et change à la revanche, puisque la donne qui la relance le fait avancer.
+    signature: `${state.winner}|${state.lastEvent.seq}`,
+    details: {
+      quads: me.stats.quads,
+      twos: me.stats.twos,
+      president_streak: me.stats.bestPresidentRun,
+      rags_to_riches: me.stats.ragsToRiches,
+    },
+    winners: accountsOf([state.players[state.winner]].filter(Boolean)),
+    vsBots: withBots(state.players),
   };
 }
 

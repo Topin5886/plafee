@@ -76,6 +76,19 @@ export function createSpectatorDesk(onChange: (list: Spectator[]) => void) {
     },
 
     /**
+     * Remet le registre dans l'état d'une photo prise avec `list()` : les
+     * observateurs qu'un `fillVacatedSeats` avait assis y reviennent avec leur
+     * demande de place et leur rang dans la file.
+     */
+    restore(snapshot: Spectator[]) {
+      const current = new Map(desk);
+      desk.clear();
+      for (const s of snapshot) desk.set(s.id, current.get(s.id) ?? s);
+      for (const [id, s] of current) if (!desk.has(id)) desk.set(id, s);
+      emit();
+    },
+
+    /**
      * Donne les sièges des joueurs partis aux observateurs qui attendent.
      * Renvoie la liste de joueurs à jour ; ceux qui ont trouvé place quittent
      * le registre.
@@ -115,8 +128,9 @@ export function withSeatsFilled<S extends { players: Seat[] }, R extends { state
   if (players === state.players) return probe;
   const seated = apply({ ...state, players } as S);
   if (seated.error) {
-    // Improbable, mais on ne perd personne : retour au registre d'avant.
-    for (const s of snapshot) if (!desk.has(s.id)) desk.add(s.id, s.name);
+    // Improbable, mais on ne perd personne : retour au registre d'avant,
+    // demandes de place comprises.
+    desk.restore(snapshot);
     return probe;
   }
   return seated;

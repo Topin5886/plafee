@@ -11,6 +11,7 @@ export type Category =
   | 'uno'
   | 'puissance4'
   | 'verite'
+  | 'president'
   | 'social'
   | 'defis'
   | 'evenement'
@@ -58,6 +59,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   uno: 'UNO',
   puissance4: 'Puissance 4',
   verite: 'Roulette de Vérité',
+  president: 'Président',
   social: 'Sociabilité',
   defis: 'Défis',
   evenement: 'Événements',
