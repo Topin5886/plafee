@@ -7,14 +7,15 @@
 /* --- Onglets dans l'en-tête --------------------------------------------------- */
 
 /*
- * Le logo à gauche, puis une seule rangée calée à droite, sur le bord du
- * contenu en dessous : les onglets et les
- * commandes, tous au même écart (--hdr-gap). Header.tsx mesure la rangée et
+ * Le logo à gauche, les onglets au centre de l'en-tête, les commandes
+ * calées à droite sur le bord du contenu en dessous, au même écart
+ * (--hdr-gap). Header.tsx mesure la rangée et
  * choisit le premier palier (data-fit) qui tient ; chaque palier ne fait que
  * resserrer le précédent. Sans JS, rien ne s'affiche de toute façon.
  */
 .site-header { --hdr-gap: 8px; --hdr-box: 40px; }
 .site-header .container { max-width: 1440px; }
+.site-header-inner { position: relative; }
 
 .site-header-bar {
   display: flex;
@@ -38,6 +39,10 @@
 
 /* Les onglets de l'en-tête : des cases à la hauteur des commandes. */
 .soc-nav[data-variant='header'] {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: none;
   flex: none;
   gap: var(--hdr-gap);
@@ -47,6 +52,14 @@
   background: none;
   box-shadow: none;
   overflow: visible;
+}
+
+/* Sans la place pour le centre exact, les onglets rejoignent la rangée et se
+   centrent entre le logo et les commandes (voir Header.tsx). */
+.site-header[data-nav-pos='flow'] .soc-nav[data-variant='header'] {
+  position: static;
+  transform: none;
+  margin-inline: auto;
 }
 
 .soc-nav[data-variant='header'] .soc-nav-link {

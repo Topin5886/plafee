@@ -38,20 +38,40 @@ function useHeaderFit() {
     if (!h || !b) return;
     const root = document.documentElement;
 
+    // Les onglets sont centrés sur l'en-tête, hors de la rangée : on vérifie
+    // à part qu'ils ne touchent ni le logo ni les commandes.
+    const clear = () => {
+      const nav = b.querySelector<HTMLElement>('.soc-nav[data-variant="header"]');
+      if (!nav || nav.offsetWidth === 0) return true;
+      const n = nav.getBoundingClientRect();
+      const brand = h.querySelector('.site-brand')?.getBoundingClientRect();
+      const actions = b.querySelector('.site-header-actions')?.getBoundingClientRect();
+      const gap = 8;
+      return (!brand || brand.right + gap <= n.left) && (!actions || n.right + gap <= actions.left);
+    };
+
     const fit = () => {
       const hasNav = !!b.querySelector('.soc-nav');
       let level: string = LEVELS[LEVELS.length - 1];
-      for (const l of LEVELS) {
+      let pos = 'flow';
+      search: for (const l of LEVELS) {
         if (!hasNav && NAV_IN.has(l)) continue;
         h.dataset.fit = l;
-        // `safe flex-end` : un contenu trop large part de la gauche, donc
-        // scrollWidth mesure bien tout le dépassement.
-        if (b.scrollWidth <= b.clientWidth) {
-          level = l;
-          break;
+        // Au centre de l'en-tête si la place le permet, sinon au centre de
+        // l'espace libre entre le logo et les commandes, avant de resserrer.
+        for (const p of ['page', 'flow']) {
+          h.dataset.navPos = p;
+          // `safe flex-end` : un contenu trop large part de la gauche, donc
+          // scrollWidth mesure bien tout le dépassement.
+          if (b.scrollWidth <= b.clientWidth && clear()) {
+            level = l;
+            pos = p;
+            break search;
+          }
         }
       }
       h.dataset.fit = level;
+      h.dataset.navPos = pos;
       // Les onglets de la page se cachent quand ils sont déjà dans l'en-tête.
       root.dataset.hdrNav = hasNav && NAV_IN.has(level) ? 'in' : 'out';
     };
@@ -90,7 +110,7 @@ export function Header() {
           <img src={`${BRAND}plafee-mark.svg`} alt="" className="site-brand-mark" width={23} height={40} />
           <img src={`${BRAND}plafee-wordmark.svg`} alt="" className="site-brand-word" width={116} height={20} />
         </Link>
-        {/* Onglets et commandes : une seule rangée calée à droite, même écart partout. */}
+        {/* Onglets centrés sur l'en-tête, commandes calées à droite. */}
         <div className="site-header-bar" ref={bar}>
           <SocialNav variant="header" />
           <div className="site-header-actions">
