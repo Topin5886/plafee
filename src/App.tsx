@@ -18,7 +18,8 @@ import { RegisterPage } from './features/account/RegisterPage';
 import { ProfilePage } from './features/account/ProfilePage';
 import { SocialProvider } from './features/social/SocialProvider';
 import { PlafeeProvider } from './features/plafee/PlafeeProvider';
-import { EventBanner, EventPopup, StandingNotice } from './features/plafee/components/site';
+import { EventBanner, StandingNotice } from './features/plafee/components/site';
+import { LaunchPopups } from './features/plafee/components/patchNotes';
 import { VictoryFx } from './features/plafee/components/VictoryFx';
 import { SiteFooter } from './features/legal/SiteFooter';
 import { LegalGate } from './features/legal/LegalGate';
@@ -41,6 +42,7 @@ const PlayerPage = lazy(() => import('./features/social/pages/PlayerPage').then(
 const ShopPage = lazy(() => import('./features/plafee/pages/ShopPage').then(m => ({ default: m.ShopPage })));
 const TrophyHallPage = lazy(() => import('./features/plafee/pages/TrophyHallPage').then(m => ({ default: m.TrophyHallPage })));
 const EventsPage = lazy(() => import('./features/plafee/pages/EventsPage').then(m => ({ default: m.EventsPage })));
+const PatchNotesPage = lazy(() => import('./features/plafee/pages/PatchNotesPage').then(m => ({ default: m.PatchNotesPage })));
 const AdminPage = lazy(() => import('./features/plafee/admin/AdminPage').then(m => ({ default: m.AdminPage })));
 const LegalPage = lazy(() => import('./features/legal/LegalPage'));
 
@@ -56,7 +58,7 @@ function App() {
       <Header />
       <StandingNotice />
       <EventBanner />
-      <EventPopup />
+      <LaunchPopups />
       <VictoryFx />
       <main className="site-main">
         <Suspense
@@ -92,6 +94,7 @@ function App() {
           <Route path="/boutique" element={<ShopPage />} />
           <Route path="/trophees" element={<TrophyHallPage />} />
           <Route path="/evenements" element={<EventsPage />} />
+          <Route path="/nouveautes" element={<PatchNotesPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/mentions-legales" element={<LegalPage page="mentions-legales" />} />
           <Route path="/confidentialite" element={<LegalPage page="confidentialite" />} />

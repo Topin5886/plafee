@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ComponentType, type CSSProperties } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Gauge, House, MessagesSquare, PartyPopper, Radio, Settings, Store, Trophy, Medal, Users, X, type LucideProps } from 'lucide-react';
+import { Gauge, House, MessagesSquare, PartyPopper, Radio, Settings, Sparkles, Store, Trophy, Medal, Users, X, type LucideProps } from 'lucide-react';
 import { accountsEnabled } from '../lib/supabase';
 import { useAuth } from '../features/account/useAuth';
 import { useSocial } from '../features/social/useSocial';
@@ -54,6 +54,7 @@ export function MainMenu() {
         { to: '/', label: 'Accueil', icon: House },
         { to: '/sessions', label: 'Sessions', icon: Radio, account: true },
         { to: '/evenements', label: 'Événements', icon: PartyPopper },
+        { to: '/nouveautes', label: 'Nouveautés', icon: Sparkles },
       ],
     },
     {
