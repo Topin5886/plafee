@@ -7,7 +7,8 @@
 /* --- Onglets dans l'en-tête --------------------------------------------------- */
 
 /*
- * Le logo à gauche, puis une seule rangée centrée : les onglets et les
+ * Le logo à gauche, puis une seule rangée calée à droite, sur le bord du
+ * contenu en dessous : les onglets et les
  * commandes, tous au même écart (--hdr-gap). Header.tsx mesure la rangée et
  * choisit le premier palier (data-fit) qui tient ; chaque palier ne fait que
  * resserrer le précédent. Sans JS, rien ne s'affiche de toute façon.
@@ -19,8 +20,8 @@
   display: flex;
   flex: 1 1 auto;
   align-items: center;
-  justify-content: center;
-  justify-content: safe center;
+  justify-content: flex-end;
+  justify-content: safe flex-end;
   gap: var(--hdr-gap);
   min-width: 0;
 }

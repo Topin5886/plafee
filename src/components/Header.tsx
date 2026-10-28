@@ -44,7 +44,7 @@ function useHeaderFit() {
       for (const l of LEVELS) {
         if (!hasNav && NAV_IN.has(l)) continue;
         h.dataset.fit = l;
-        // `safe center` : un contenu trop large part de la gauche, donc
+        // `safe flex-end` : un contenu trop large part de la gauche, donc
         // scrollWidth mesure bien tout le dépassement.
         if (b.scrollWidth <= b.clientWidth) {
           level = l;
@@ -90,7 +90,7 @@ export function Header() {
           <img src={`${BRAND}plafee-mark.svg`} alt="" className="site-brand-mark" width={23} height={40} />
           <img src={`${BRAND}plafee-wordmark.svg`} alt="" className="site-brand-word" width={116} height={20} />
         </Link>
-        {/* Onglets et commandes : une seule rangée centrée, même écart partout. */}
+        {/* Onglets et commandes : une seule rangée calée à droite, même écart partout. */}
         <div className="site-header-bar" ref={bar}>
           <SocialNav variant="header" />
           <div className="site-header-actions">

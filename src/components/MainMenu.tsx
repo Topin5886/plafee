@@ -68,7 +68,7 @@ export function MainMenu() {
       entries: [
         { to: '/classements', label: 'Classements', icon: Trophy },
         { to: '/trophees', label: 'Hall des trophées', icon: Medal },
-        { to: '/boutique', label: 'Boutique', icon: Store, account: true },
+        { to: '/boutique', label: 'Boutique', icon: Store },
       ],
     },
   ];
